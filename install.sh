@@ -61,3 +61,6 @@ source ~/.zshrc
 
 echo "Dotfiles setup complete!"
 
+git config --global user.name "Tryston Minsquero"
+git config --global user.email "trystonminsquero@gmail.com"
+git config --global init.defaultBranch "main"
