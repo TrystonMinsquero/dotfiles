@@ -135,6 +135,36 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	end,
 })
 
+local proj_langs = {
+	{
+		name = "zig",
+		is_active = function()
+			local files_string = vim.fn.system("ls")
+			print(files_string)
+			return files_string:find("build.zig", 1, true)
+		end,
+		load_proj = function()
+			vim.keymap.set("n", "<leader>b", "<cmd>!zig build run<CR>", { desc = "[B]uild" })
+			vim.keymap.set("n", "<leader>r", "<cmd>!zig build -Dreload=true<CR>", { desc = "[R]eload" })
+		end,
+	},
+}
+
+function setup_project_keymaps()
+	for _, lang in ipairs(proj_langs) do
+		if lang.is_active() then
+			lang.load_proj()
+			break
+		end
+	end
+end
+
+-- Create an Autocommand to call the function when entering a buffer
+-- vim.api.nvim_create_autocmd("BufEnter", {
+-- 	group = vim.api.nvim_create_augroup("ProjectKeymaps", { clear = true }),
+-- 	callback = setup_project_keymaps,
+-- })
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -402,7 +432,43 @@ require("lazy").setup({
 		"mbbill/undotree",
 		event = "VimEnter",
 		config = function()
-			vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
+			vim.keymap.set("n", "<leader>u", "<cmd>UndotreeToggle<CR><C-w><C-h>", { desc = "[U]ndo Tree Toggle" })
+		end,
+	},
+	{
+		"CRAG666/code_runner.nvim",
+		config = function()
+			require("code_runner").setup({
+				filetype = {
+					java = { "cd $dir &&", "javac $fileName &&", "java $fileNameWithoutExt" },
+					python = "python3 -u",
+					-- rust = { "cd $dir &&", "rustc $fileName &&", "$dir/$fileNameWithoutExt" },
+					zig = function(...)
+						local root_dir = require("lspconfig").util.root_pattern("zig.build")(vim.loop.cwd())
+						return "cd " .. root_dir .. " && zig build run"
+					end,
+					cs = function(...)
+						local root_dir = require("lspconfig").util.root_pattern("*.csproj")(vim.loop.cwd())
+						return "cd " .. root_dir .. " && dotnet run$end"
+					end,
+				},
+				project = {
+					["~/dev/Zig-Sim"] = {
+						name = "Zig Simumlation",
+						description = "A simple project to try and learn zig",
+						command = "zig build run",
+					},
+				},
+				mode = "float",
+			})
+
+			vim.keymap.set("n", "<leader>rr", ":RunCode<CR>", { noremap = true, silent = false, desc = "[R]un Code" })
+			vim.keymap.set("n", "<leader>rf", ":RunFile<CR>", { noremap = true, silent = false })
+			vim.keymap.set("n", "<leader>rft", ":RunFile tab<CR>", { noremap = true, silent = false })
+			vim.keymap.set("n", "<leader>rp", ":RunProject<CR>", { noremap = true, silent = false })
+			vim.keymap.set("n", "<leader>rc", ":RunClose<CR>", { noremap = true, silent = false })
+			vim.keymap.set("n", "<leader>crf", ":CRFiletype<CR>", { noremap = true, silent = false })
+			vim.keymap.set("n", "<leader>crp", ":CRProjects<CR>", { noremap = true, silent = false })
 		end,
 	},
 	{
@@ -641,15 +707,6 @@ require("lazy").setup({
 				-- clangd = {},
 				-- gopls = {},
 				-- pyright = {},
-				-- rust_analyzer = {},
-				-- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
-				--
-				-- Some languages (like typescript) have entire language plugins that can be useful:
-				--    https://github.com/pmizio/typescript-tools.nvim
-				--
-				-- But for many setups, the LSP (`ts_ls`) will work just fine
-				-- ts_ls = {},
-				--
 
 				lua_ls = {
 					-- cmd = { ... },
@@ -662,22 +719,6 @@ require("lazy").setup({
 							},
 							-- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
 							-- diagnostics = { disable = { 'missing-fields' } },
-						},
-					},
-				},
-				jsonls = {
-					settings = {
-						json = {
-							schemas = {
-								extra = {
-									{
-										description = "Machine Model",
-										fileMatch = "Machine.json",
-										name = "MachineModel.json",
-										url = "/Users/tryston.minsquero/Projects/mobile/tools/jenkins/schema_tools/schemas/MachineModel.json",
-									},
-								},
-							},
 						},
 					},
 				},
@@ -797,28 +838,9 @@ require("lazy").setup({
 		--- @type blink.cmp.Config
 		opts = {
 			keymap = {
-				-- 'default' (recommended) for mappings similar to built-in completions
-				--   <c-y> to accept ([y]es) the completion.
-				--    This will auto-import if your LSP supports it.
-				--    This will expand snippets if the LSP sent a snippet.
-				-- 'super-tab' for tab to accept
-				-- 'enter' for enter to accept
-				-- 'none' for no mappings
-				--
-				-- For an understanding of why the 'default' preset is recommended,
-				-- you will need to read `:help ins-completion`
-				--
-				-- No, but seriously. Please read `:help ins-completion`, it is really good!
-				--
-				-- All presets have the following mappings:
-				-- <tab>/<s-tab>: move to right/left of your snippet expansion
-				-- <c-space>: Open menu or open docs if already open
-				-- <c-n>/<c-p> or <up>/<down>: Select next/previous item
-				-- <c-e>: Hide menu
-				-- <c-k>: Toggle signature help
-				--
 				-- See :h blink-cmp-config-keymap for defining your own keymap
 				preset = "super-tab",
+				["<CR>"] = { "select_and_accept", "fallback" },
 
 				-- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
 				--    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
@@ -833,7 +855,7 @@ require("lazy").setup({
 			completion = {
 				-- By default, you may press `<c-space>` to show the documentation.
 				-- Optionally, set `auto_show = true` to show the documentation after a delay.
-				documentation = { auto_show = false, auto_show_delay_ms = 500 },
+				documentation = { auto_show = true, auto_show_delay_ms = 500 },
 			},
 
 			sources = {
