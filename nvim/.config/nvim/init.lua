@@ -121,6 +121,24 @@ vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper win
 -- vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
 -- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
 
+vim.api.nvim_create_user_command("E", "Explore", {})
+
+vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+  callback = function()
+    -- Check for tab characters in the entire buffer.
+    -- The `search()` function returns a non-zero number if a match is found.
+    if vim.fn.search('\t', 'nW') == 0 then
+      -- If no tabs are found, set expandtab (et) for the current buffer.
+      vim.bo.expandtab = true
+      vim.bo.tabstop = 4
+      vim.bo.shiftwidth = 4
+    else
+      -- If tabs are found, set noexpandtab (noet).
+      vim.bo.expandtab = false
+    end
+  end,
+})
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -158,6 +176,8 @@ function setup_project_keymaps()
 		end
 	end
 end
+
+vim.keymap.set("n", "<leader>ev", "<cmd>e $MYVIMRC<CR>", { desc = "[E]dit [v]imrc" })
 
 -- Create an Autocommand to call the function when entering a buffer
 -- vim.api.nvim_create_autocmd("BufEnter", {
@@ -541,11 +561,6 @@ require("lazy").setup({
 			vim.api.nvim_create_autocmd("LspAttach", {
 				group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
 				callback = function(event)
-					-- NOTE: Remember that Lua is a real programming language, and as such it is possible
-					-- to define small helper and utility functions so you don't have to repeat yourself.
-					--
-					-- In this case, we create a function that lets us more easily define mappings specific
-					-- for LSP related items. It sets the mode, buffer and description for us each time.
 					local map = function(keys, func, desc, mode)
 						mode = mode or "n"
 						vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = "LSP: " .. desc })
@@ -560,6 +575,7 @@ require("lazy").setup({
 					map("<leader>la", vim.lsp.buf.code_action, "[G]oto Code [A]ction", { "n", "x" })
 
 					map("<leader>lh", vim.lsp.buf.hover, "Show [h]over")
+					map("K", vim.lsp.buf.hover, "Show [h]over")
 
 					-- Find references for the word under your cursor.
 					map("<leader>lr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
@@ -572,6 +588,7 @@ require("lazy").setup({
 					--  This is where a variable was first declared, or where a function is defined, etc.
 					--  To jump back, press <C-t>.
 					map("<leader>ld", require("telescope.builtin").lsp_definitions, "[G]oto [D]efinition")
+					map("gd", require("telescope.builtin").lsp_definitions, "[G]oto [D]efinition")
 
 					-- WARN: This is not Goto Definition, this is Goto Declaration.
 					--  For example, in C this would take you to the header.
@@ -762,7 +779,7 @@ require("lazy").setup({
 
 	{ -- Autoformat
 		"stevearc/conform.nvim",
-		event = { "BufWritePre" },
+		event = {},
 		cmd = { "ConformInfo" },
 		keys = {
 			{
