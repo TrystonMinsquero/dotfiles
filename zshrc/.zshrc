@@ -8,13 +8,13 @@ export ZSH="$HOME/.oh-my-zsh"
 # load a random theme each time Oh My Zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="random"
+ZSH_THEME="robbyrussell"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
 # a theme from this variable instead of looking in $ZSH/themes/
 # If set to an empty array, this variable will have no effect.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster"  "")
+ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster"  "tjkirch_mod" "johnson")
 #
 # Themes i've liked on random
 # tjkirch_mod
@@ -93,8 +93,6 @@ source <(fzf --zsh)
 alias pbcopy="xlip -selection current"
 
 alias py="python3"
-alias vim="nvim"
-alias vi="nvim"
 alias lg="lazygit"
 
 # App Shortcuts
@@ -106,3 +104,7 @@ alias ghosttyconf="nvim ~/.config/ghostty/config"
 alias installconf="nvim ~/dotfiles/install.sh"
 
 export PATH="/snap/bin/:$PATH"
+
+if [ -f "$HOME/.zshrc_extra" ]; then
+    source "$HOME/.zshrc_extra"
+fi
