@@ -74,12 +74,19 @@ ZSH_THEME="random"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+plugins=(
+    git
+    zsh-autosuggestions
+)
 
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
-#
+
+set -o vi
+# bindkey '^I' autosuggest-accept
+# bindkey -M viins '^I^I' expand-or-complete
+
 # Set up fzf key bindings and fuzzy completion
 source <(fzf --zsh)
 
@@ -93,9 +100,9 @@ alias lg="lazygit"
 # App Shortcuts
 alias todo="nvim ~/.todo.md"
 alias zshconf="nvim ~/.zshrc"
-alias zshreload="zsh ~/.zshrc"
+alias zshreload="source ~/.zshrc"
 alias nvimconf="nvim ~/.config/nvim/init.lua"
 alias ghosttyconf="nvim ~/.config/ghostty/config"
 alias installconf="nvim ~/dotfiles/install.sh"
 
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+export PATH="/snap/bin/:$PATH"
