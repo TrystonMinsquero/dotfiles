@@ -870,22 +870,25 @@ require("lazy").setup({
 		config = function()
 			---@diagnostic disable-next-line: missing-fields
 			require("tokyonight").setup({
-				transparent = true,
+				transparent = false,
 				styles = {
 					comments = { italic = false }, -- Disable italics in comments
 					-- Options are "dark", "transparent", or "normal"
 					-- floats = "normal",
 					-- sidebars = "normal",
 				},
-      })
-
+			})
 			-- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
 			vim.cmd.colorscheme("tokyonight-moon")
 		end,
 	},
-
-
-
+	{
+		"xiyaowong/transparent.nvim",
+		config = function ()
+			vim.keymap.set("n", "<leader>to", "<cmd>TransparentToggle<CR>", 
+				{ desc = "[T]oggle [O]pacity", })
+		end,
+	},
 	-- Highlight todo, notes, etc in comments
 	{
 		"folke/todo-comments.nvim",
