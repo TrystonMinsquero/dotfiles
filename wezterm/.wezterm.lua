@@ -29,7 +29,9 @@ config.cell_width = 0.9
 -- config.font = wezterm.font("M+ 1m")
 -- config.font = wezterm.font("Hack Regular")
 -- config.cell_width = 0.9
-config.window_background_opacity = 0.9
+
+local opacity = .75 -- Value is also used for toggling
+config.window_background_opacity = opacity
 config.prefer_egl = true
 config.font_size = 14.0
 
@@ -160,7 +162,7 @@ config.keys = {
 		action = wezterm.action_callback(function(window, _)
 			local overrides = window:get_config_overrides() or {}
 			if overrides.window_background_opacity == 1.0 then
-				overrides.window_background_opacity = 0.9
+				overrides.window_background_opacity = opacity
 			else
 				overrides.window_background_opacity = 1.0
 			end
@@ -222,7 +224,10 @@ config.window_frame = {
 
 -- config.window_decorations = "INTEGRATED_BUTTONS | RESIZE"
 config.window_decorations = "NONE | RESIZE"
-config.default_prog = { "powershell.exe", "-NoLogo" }
+if wezterm.target_triple:find("windows") then
+  config.default_prog = { 'powershell.exe', "-NoLogo" }
+end
+
 config.initial_cols = 80
 -- config.window_background_image = "C:/dev/misc/berk.png"
 -- config.window_background_image_hsb = {
