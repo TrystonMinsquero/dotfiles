@@ -76,7 +76,7 @@ ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster"  "tjkirch_mod" "johnson"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
     git
-    zsh-autosuggestions
+    # zsh-autosuggestions
 )
 
 source $ZSH/oh-my-zsh.sh
