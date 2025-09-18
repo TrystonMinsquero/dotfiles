@@ -107,35 +107,65 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	end,
 })
 
-local proj_langs = {
-	{
-		name = "zig",
-		is_active = function()
-			local files_string = vim.fn.system("ls")
-			print(files_string)
-			return files_string:find("build.zig", 1, true)
-		end,
-		load_proj = function()
-			vim.keymap.set("n", "<leader>b", "<cmd>!zig build run<CR>", { desc = "[B]uild" })
-			vim.keymap.set("n", "<leader>r", "<cmd>!zig build -Dreload=true<CR>", { desc = "[R]eload" })
-		end,
-	},
-}
+-- local proj_langs = {
+--	{
+--		name = "zig",
+--		paths = {
+--			"~/zig-pong/"
+--		},
+--		load_proj = function()
+--			if vim.fn.has('wsl') then
+--				vim.keymap.set("n", "<leader>b", "<cmd>!zig build -Dtargetrun<CR>", { desc = "[B]uild" })
+--				vim.keymap.set("n", "<leader>r", "<cmd>!zig build -Dreload=true<CR>", { desc = "[R]eload" })
+--       else
+--         print("What machine or you on?")
+--			end
+--		end,
+--	},
+-- }
 
-function setup_project_keymaps()
-	for _, lang in ipairs(proj_langs) do
-		if lang.is_active() then
-			lang.load_proj()
-			break
+local find_term_buff = function ()
+  print("buffer nubmers:")
+	for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+    print(bufnr)
+		if vim.api.nvim_buf_is_loaded(bufnr) then
+			local buf_name = vim.api.nvim_buf_get_name(bufnr)
+      print(bufnr, buf_name)
+			if buf_name then
+        if buf_name:match("term:") then
+          return bufnr
+        end
+			end
 		end
 	end
+  return -1
 end
 
--- Create an Autocommand to call the function when entering a buffer
--- vim.api.nvim_create_autocmd("BufEnter", {
--- 	group = vim.api.nvim_create_augroup("ProjectKeymaps", { clear = true }),
--- 	callback = setup_project_keymaps,
--- })
+vim.api.nvim_create_autocmd({ "BufEnter" }, {
+	group = vim.api.nvim_create_augroup("Project Specifics", {clear = true}),
+	callback = function()
+		local buffer_path = vim.api.nvim_buf_get_name(0)
+		print(buffer_path)
+		if buffer_path:match("zig") then
+			-- print("Your in a ziggy project")
+			vim.keymap.set("n", "<leader>r", function ()
+				local buf_term = find_term_buff()
+				vim.fn.jobstart({"zig", "build", "-Dtarget=x86_64-windows-gnu", "run"}, {
+					-- stdout_buffered = true,
+					-- on_stdout = function(_, data)
+					--	if data then
+					--		vim.
+					--	end
+					-- end,
+				})
+			end, { desc = "[B]uild" })
+		elseif buffer_path:match(".config/nvim/init.lua") then
+			vim.o.expandtab = false
+			-- print("Shouldn't you be working on something?")
+		end
+	end,
+})
+
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
@@ -170,25 +200,7 @@ require("lazy").setup({
 	-- NOTE: Plugins can also be added by using a table,
 	-- with the first argument being the link and the following
 	-- keys can be used to configure plugin behavior/loading/etc.
-	--
-	-- Use `opts = {}` to automatically pass options to a plugin's `setup()` function, forcing the plugin to be loaded.
-	--
 
-	-- Alternatively, use `config = function() ... end` for full control over the configuration.
-	-- If you prefer to call `setup` explicitly, use:
-	--    {
-	--        'lewis6991/gitsigns.nvim',
-	--        config = function()
-	--            require('gitsigns').setup({
-	--                -- Your gitsigns configuration here
-	--            })
-	--        end,
-	--    }
-	--
-	-- Here is a more advanced example where we pass configuration
-	-- options to `gitsigns.nvim`.
-	--
-	-- See `:help gitsigns` to understand what the configuration keys do
 	{ -- Adds git related signs to the gutter, as well as utilities for managing changes
 		"lewis6991/gitsigns.nvim",
 		opts = {
@@ -199,23 +211,62 @@ require("lazy").setup({
 				topdelete = { text = "‾" },
 				changedelete = { text = "~" },
 			},
+			on_attach = function(bufnr)
+				local gitsigns = require 'gitsigns'
+
+				local function map(mode, l, r, opts)
+					opts = opts or {}
+					opts.buffer = bufnr
+					vim.keymap.set(mode, l, r, opts)
+				end
+
+				local function nextChange()
+					if vim.wo.diff then
+						vim.cmd.normal { ']c', bang = true }
+					else
+						gitsigns.nav_hunk 'next'
+					end
+				end
+
+				local function prevChange()
+					if vim.wo.diff then
+						vim.cmd.normal { '[c', bang = true }
+					else
+						gitsigns.nav_hunk 'prev'
+					end
+				end
+
+				-- Navigation
+				map('n', ']c', nextChange, { desc = 'Jump to next git [c]hange' })
+				map('n', '[c', prevChange, { desc = 'Jump to previous git [c]hange' })
+				map('n', '<leader>hn', nextChange, { desc = 'Jump to [n]ext git [c]hange' })
+				map('n', '<leader>hN', prevChange, { desc = 'Jump to previous git [c]hange' })
+				-- Actions
+				-- visual mode
+				map('v', '<leader>hs', function()
+					gitsigns.stage_hunk { vim.fn.line '.', vim.fn.line 'v' }
+				end, { desc = 'git [s]tage hunk' })
+				map('v', '<leader>hr', function()
+					gitsigns.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
+				end, { desc = 'git [r]eset hunk' })
+				-- normal mode
+				map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'git [s]tage hunk' })
+				map('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'git [r]eset hunk' })
+				map('n', '<leader>hS', gitsigns.stage_buffer, { desc = 'git [S]tage buffer' })
+				map('n', '<leader>hu', gitsigns.stage_hunk, { desc = 'git [u]ndo stage hunk' })
+				map('n', '<leader>hR', gitsigns.reset_buffer, { desc = 'git [R]eset buffer' })
+				map('n', '<leader>hp', gitsigns.preview_hunk, { desc = 'git [p]review hunk' })
+				map('n', '<leader>hb', gitsigns.blame_line, { desc = 'git [b]lame line' })
+				map('n', '<leader>hd', gitsigns.diffthis, { desc = 'git [d]iff against index' })
+				map('n', '<leader>hD', function()
+					gitsigns.diffthis '@'
+				end, { desc = 'git [D]iff against last commit' })
+				-- Toggles
+				map('n', '<leader>tb', gitsigns.toggle_current_line_blame, { desc = '[T]oggle git show [b]lame line' })
+				map('n', '<leader>tD', gitsigns.preview_hunk_inline, { desc = '[T]oggle git show [D]eleted' })
+			end,
 		},
 	},
-
-	-- NOTE: Plugins can also be configured to run Lua code when they are loaded.
-	--
-	-- This is often very useful to both group configuration, as well as handle
-	-- lazy loading plugins that don't need to be loaded immediately at startup.
-	--
-	-- For example, in the following configuration, we use:
-	--  event = 'VimEnter'
-	--
-	-- which loads which-key before all the UI elements are loaded. Events can be
-	-- normal autocommands events (`:help autocmd-events`).
-	--
-	-- Then, because we use the `opts` key (recommended), the configuration runs
-	-- after the plugin has been loaded as `require(MODULE).setup(opts)`.
-
 	{ -- Useful plugin to show you pending keybinds.
 		"folke/which-key.nvim",
 		event = "VimEnter", -- Sets the loading event to 'VimEnter'
@@ -259,7 +310,6 @@ require("lazy").setup({
 					F12 = "<F12>",
 				},
 			},
-
 			-- Document existing key chains
 			spec = {
 				{ "<leader>s", group = "[S]earch" },
@@ -268,14 +318,6 @@ require("lazy").setup({
 			},
 		},
 	},
-
-	-- NOTE: Plugins can specify dependencies.
-	--
-	-- The dependencies are proper plugin specifications as well - anything
-	-- you do for a plugin at the top level, you can do for a dependency.
-	--
-	-- Use the `dependencies` key to specify the dependencies of a particular plugin
-
 	{ -- Fuzzy Finder (files, lsp, etc)
 		"nvim-telescope/telescope.nvim",
 		event = "VimEnter",
@@ -283,11 +325,9 @@ require("lazy").setup({
 			"nvim-lua/plenary.nvim",
 			{ -- If encountering errors, see telescope-fzf-native README for installation instructions
 				"nvim-telescope/telescope-fzf-native.nvim",
-
 				-- `build` is used to run some command when the plugin is installed/updated.
 				-- This is only run then, not every time Neovim starts up.
 				build = "make",
-
 				-- `cond` is a condition used to determine whether this plugin should be
 				-- installed and loaded.
 				cond = function()
@@ -295,7 +335,6 @@ require("lazy").setup({
 				end,
 			},
 			{ "nvim-telescope/telescope-ui-select.nvim" },
-
 			-- Useful for getting pretty icons, but requires a Nerd Font.
 			{ "nvim-tree/nvim-web-devicons", enabled = vim.g.have_nerd_font },
 		},
@@ -418,41 +457,50 @@ require("lazy").setup({
 		end,
 	},
 	{
-		"CRAG666/code_runner.nvim",
-		config = function()
-			require("code_runner").setup({
-				filetype = {
-					java = { "cd $dir &&", "javac $fileName &&", "java $fileNameWithoutExt" },
-					python = "python3 -u",
-					-- rust = { "cd $dir &&", "rustc $fileName &&", "$dir/$fileNameWithoutExt" },
-					zig = function(...)
-						local root_dir = require("lspconfig").util.root_pattern("zig.build")(vim.loop.cwd())
-						return "cd " .. root_dir .. " && zig build run"
-					end,
-					cs = function(...)
-						local root_dir = require("lspconfig").util.root_pattern("*.csproj")(vim.loop.cwd())
-						return "cd " .. root_dir .. " && dotnet run$end"
-					end,
-				},
-				project = {
-					["~/dev/Zig-Sim"] = {
-						name = "Zig Simumlation",
-						description = "A simple project to try and learn zig",
-						command = "zig build run",
-					},
-				},
-				mode = "float",
+		'stevearc/overseer.nvim',
+		opts = {},
+		config = function ()
+			require("overseer").setup({
+				templates = { "builtin" },
 			})
-
-			vim.keymap.set("n", "<leader>rr", ":RunCode<CR>", { noremap = true, silent = false, desc = "[R]un Code" })
-			vim.keymap.set("n", "<leader>rf", ":RunFile<CR>", { noremap = true, silent = false })
-			vim.keymap.set("n", "<leader>rft", ":RunFile tab<CR>", { noremap = true, silent = false })
-			vim.keymap.set("n", "<leader>rp", ":RunProject<CR>", { noremap = true, silent = false })
-			vim.keymap.set("n", "<leader>rc", ":RunClose<CR>", { noremap = true, silent = false })
-			-- vim.keymap.set("n", "<leader>crf", ":CRFiletype<CR>", { noremap = true, silent = false })
-			-- vim.keymap.set("n", "<leader>crp", ":CRProjects<CR>", { noremap = true, silent = false })
 		end,
 	},
+	-- {
+	--	-- "CRAG666/code_runner.nvim",
+		-- config = function()
+		--	require("code_runner").setup({
+		--		filetype = {
+		--			java = { "cd $dir &&", "javac $fileName &&", "java $fileNameWithoutExt" },
+		--			python = "python3 -u",
+		--			-- rust = { "cd $dir &&", "rustc $fileName &&", "$dir/$fileNameWithoutExt" },
+		--			zig = function(...)
+		--				local root_dir = require("lspconfig").util.root_pattern("zig.build")(vim.loop.cwd())
+		--				return "cd " .. root_dir .. " && zig build run"
+		--			end,
+		--			cs = function(...)
+		--				local root_dir = require("lspconfig").util.root_pattern("*.csproj")(vim.loop.cwd())
+		--				return "cd " .. root_dir .. " && dotnet run$end"
+		--			end,
+		--		},
+		--		project = {
+		--			["~/dev/Zig-Sim"] = {
+		--				name = "Zig Simumlation",
+		--				description = "A simple project to try and learn zig",
+		--				command = "zig build run",
+		--			},
+		--		},
+		--		mode = "float",
+		--	})
+
+			-- vim.keymap.set("n", "<leader>rr", ":RunCode<CR>", { noremap = true, silent = false, desc = "[R]un Code" })
+			-- vim.keymap.set("n", "<leader>rf", ":RunFile<CR>", { noremap = true, silent = false })
+			-- vim.keymap.set("n", "<leader>rft", ":RunFile tab<CR>", { noremap = true, silent = false })
+			-- vim.keymap.set("n", "<leader>rp", ":RunProject<CR>", { noremap = true, silent = false })
+			-- vim.keymap.set("n", "<leader>rc", ":RunClose<CR>", { noremap = true, silent = false })
+			-- vim.keymap.set("n", "<leader>crf", ":CRFiletype<CR>", { noremap = true, silent = false })
+			-- vim.keymap.set("n", "<leader>crp", ":CRProjects<CR>", { noremap = true, silent = false })
+		-- end,
+	-- },
 	{
 		"kdheepak/lazygit.nvim",
 		lazy = true,
@@ -702,20 +750,6 @@ require("lazy").setup({
 					},
 				},
 			}
-
-			-- Ensure the servers and tools above are installed
-			--
-			-- To check the current status of installed tools and/or manually install
-			-- other tools, you can run
-			--    :Mason
-			--
-			-- You can press `g?` for help in this menu.
-			--
-			-- `mason` had to be setup earlier: to configure its options see the
-			-- `dependencies` table for `nvim-lspconfig` above.
-			--
-			-- You can add other tools here that you want Mason to install
-			-- for you, so that they are available from within Neovim.
 			local ensure_installed = vim.tbl_keys(servers or {})
 			vim.list_extend(ensure_installed, {
 				"stylua", -- Used to format Lua code
@@ -756,18 +790,18 @@ require("lazy").setup({
 		opts = {
 			notify_on_error = false,
 			-- format_on_save = function(bufnr)
-			-- 	-- Disable "format_on_save lsp_fallback" for languages that don't
-			-- 	-- have a well standardized coding style. You can add additional
-			-- 	-- languages here or re-enable it for the disabled ones.
-			-- 	local disable_filetypes = { c = true, cpp = true }
-			-- 	if disable_filetypes[vim.bo[bufnr].filetype] then
-			-- 		return nil
-			-- 	else
-			-- 		return {
-			-- 			timeout_ms = 500,
-			-- 			lsp_format = "fallback",
-			-- 		}
-			-- 	end
+			--	-- Disable "format_on_save lsp_fallback" for languages that don't
+			--	-- have a well standardized coding style. You can add additional
+			--	-- languages here or re-enable it for the disabled ones.
+			--	local disable_filetypes = { c = true, cpp = true }
+			--	if disable_filetypes[vim.bo[bufnr].filetype] then
+			--		return nil
+			--	else
+			--		return {
+			--			timeout_ms = 500,
+			--			lsp_format = "fallback",
+			--		}
+			--	end
 			-- end,
 			formatters_by_ft = {
 				lua = { "stylua" },
