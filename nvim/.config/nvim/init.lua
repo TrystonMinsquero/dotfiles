@@ -1,100 +1,79 @@
--- Set <space> as the leader key
--- See `:help mapleader`
---  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
-vim.g.mapleader = " "
-vim.g.maplocalleader = " "
+require("options")
+require("keybinds")
 
--- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+local function is_term_buff(bufnr)
+	local buf_name = vim.api.nvim_buf_get_name(bufnr)
+	if buf_name then
+		if buf_name:match("term:") then
+			return true
+		end
+	end
+	return false
+end
 
--- [[ Setting options ]]
--- See `:help vim.o`
--- NOTE: You can change these options as you wish!
---  For more options, you can see `:help option-list`
+local function find_term_buff()
+	for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+		if vim.api.nvim_buf_is_loaded(bufnr) then
+			if is_term_buff(bufnr) then
+				return bufnr
+			end
+		end
+	end
+	return -1
+end
 
--- Make line numbers default
-vim.o.number = true
-vim.o.relativenumber = true -- TODO: Is this really good?
+local function find_term_win()
+	for _, winnr in ipairs(vim.api.nvim_list_wins()) do
+		if is_term_buff(vim.api.nvim_win_get_buf(winnr)) then
+			return winnr
+		end
+	end
+	return -1
+end
 
--- Enable mouse mode, can be useful for resizing splits for example!
-vim.o.mouse = "a"
+local function type_keys(key_str)
+	local keys = vim.api.nvim_replace_termcodes(key_str, true, true, true)
+	vim.api.nvim_feedkeys(keys, "n", false)
+end
 
--- Don't show the mode, since it's already in the status line
-vim.o.showmode = false
+local function enter_terminal()
+	local term_buff = find_term_buff()
+	if term_buff >= 0 then
+		local term_win = find_term_win()
+		if term_win >= 0 then
+			vim.api.nvim_set_current_win(term_win)
+		else
+			print("no terminal window, you gotta set this up")
+		end
+		type_keys("A")
+	else
+		vim.cmd("vsplit | term")
+		term_buff = find_term_buff()
+		assert(term_buff >= 0, "Term should exist")
+		type_keys("A")
+	end
+end
 
-vim.schedule(function()
-	vim.o.clipboard = "unnamedplus"
-end)
+-- vim.keymap.set("n", "<leader>k", "<C-w><C-l>A<C-c><up><up><CR><C-\\><C-n><C-w><C-h>", { desc = "Run last command in terminal"})
 
--- Enable break indent
-vim.o.breakindent = true
-vim.o.undofile = true
-vim.o.swapfile = false
+vim.keymap.set("n", "<leader>cl", function ()
+	local curr_win = vim.api.nvim_get_current_win()
+	enter_terminal()
+	type_keys("<C-c><up><up><CR>")
+	vim.api.nvim_set_current_win(curr_win)
+	-- local term_buff = find_term_buff()
+end, { desc = "[C]onsole run [L]ast"})
 
--- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
-vim.o.ignorecase = true
-vim.o.smartcase = true
-vim.o.signcolumn = "yes"
+vim.keymap.set("n", "<leader>co", enter_terminal, { desc = "[C]onsole [O]pen" })
 
--- Decrease update time
-vim.o.updatetime = 250
-
--- Decrease mapped sequence wait time
-vim.o.timeoutlen = 300
-
--- Configure how new splits should be opened
-vim.o.splitright = true
-vim.o.splitbelow = true
-
-vim.o.list = true
-vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
-vim.o.inccommand = "split"
-vim.o.expandtab = false
-vim.o.cursorline = true
-vim.o.scrolloff = 8
-
-vim.o.confirm = true
-
-vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
-
--- Diagnostic keymaps
-vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
-
--- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
--- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
--- is not what someone will guess without a bit more experience.
---
--- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
--- or just use <C-\><C-n> to exit terminal mode
-vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
-
--- Ctrl+S as god intended
-vim.keymap.set("n", "<C-s>", "<cmd>:w<CR>")
-
-vim.api.nvim_create_user_command("E", "Explore", {})
-vim.keymap.set("n", "<leader>e", ":Explore<CR>", { desc = "[E]xplore"})
-
-vim.keymap.set("n", "<leader>w", ":w<CR>", { desc = "[W]rite"})
-vim.keymap.set("n", "<leader>c", ":e $MYVIMRC<CR>", { desc = "edit [C]onfig"})
-
-vim.keymap.set("n", "<left>", "<C-w><C-h>", { desc = "Move focus to the left window" })
-vim.keymap.set("n", "<down>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
-vim.keymap.set("n", "<up>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
-vim.keymap.set("n", "<right", "<C-w><C-l>", { desc = "Move focus to the right window" })
---
-vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move focus to the left window" })
-vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })
-vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
-vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
 
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
-  callback = function()
+	callback = function()
 		vim.bo.tabstop = 4
 		vim.bo.shiftwidth = 4
-    vim.bo.expandtab = false
-  end,
+		vim.bo.expandtab = false
+	end,
 })
-
 
 -- Highlight when yanking (copying) text
 --  Try it with `yap` in normal mode
@@ -107,64 +86,30 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	end,
 })
 
--- local proj_langs = {
---	{
---		name = "zig",
---		paths = {
---			"~/zig-pong/"
---		},
---		load_proj = function()
---			if vim.fn.has('wsl') then
---				vim.keymap.set("n", "<leader>b", "<cmd>!zig build -Dtargetrun<CR>", { desc = "[B]uild" })
---				vim.keymap.set("n", "<leader>r", "<cmd>!zig build -Dreload=true<CR>", { desc = "[R]eload" })
---       else
---         print("What machine or you on?")
---			end
---		end,
---	},
--- }
-
-local find_term_buff = function ()
-  print("buffer nubmers:")
-	for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
-    print(bufnr)
-		if vim.api.nvim_buf_is_loaded(bufnr) then
-			local buf_name = vim.api.nvim_buf_get_name(bufnr)
-      print(bufnr, buf_name)
-			if buf_name then
-        if buf_name:match("term:") then
-          return bufnr
-        end
-			end
-		end
-	end
-  return -1
-end
-
-vim.api.nvim_create_autocmd({ "BufEnter" }, {
-	group = vim.api.nvim_create_augroup("Project Specifics", {clear = true}),
-	callback = function()
-		local buffer_path = vim.api.nvim_buf_get_name(0)
-		print(buffer_path)
-		if buffer_path:match("zig") then
-			-- print("Your in a ziggy project")
-			vim.keymap.set("n", "<leader>r", function ()
-				local buf_term = find_term_buff()
-				vim.fn.jobstart({"zig", "build", "-Dtarget=x86_64-windows-gnu", "run"}, {
-					-- stdout_buffered = true,
-					-- on_stdout = function(_, data)
-					--	if data then
-					--		vim.
-					--	end
-					-- end,
-				})
-			end, { desc = "[B]uild" })
-		elseif buffer_path:match(".config/nvim/init.lua") then
-			vim.o.expandtab = false
-			-- print("Shouldn't you be working on something?")
-		end
-	end,
-})
+-- vim.api.nvim_create_autocmd({ "BufEnter" }, {
+-- 	group = vim.api.nvim_create_augroup("Project Specifics", {clear = true}),
+-- 	callback = function()
+-- 		local buffer_path = vim.api.nvim_buf_get_name(0)
+-- 		print(buffer_path)
+-- 		if buffer_path:match("zig") then
+-- 			-- print("Your in a ziggy project")
+-- 			vim.keymap.set("n", "<leader>r", function ()
+-- 				local buf_term = find_term_buff()
+-- 				vim.fn.jobstart({"zig", "build", "-Dtarget=x86_64-windows-gnu", "run"}, {
+-- 					-- stdout_buffered = true,
+-- 					-- on_stdout = function(_, data)
+-- 					--	if data then
+-- 					--		vim.
+-- 					--	end
+-- 					-- end,
+-- 				})
+-- 			end, { desc = "[B]uild" })
+-- 		elseif buffer_path:match(".config/nvim/init.lua") then
+-- 			vim.o.expandtab = false
+-- 			-- print("Shouldn't you be working on something?")
+-- 		end
+-- 	end,
+-- })
 
 
 -- [[ Install `lazy.nvim` plugin manager ]]
@@ -445,7 +390,7 @@ require("lazy").setup({
     event = "VimEnter",
 		config = function()
 			require("virt-column").setup({
-         virtcolumn = "+1,100"
+         virtcolumn = "+1,80"
       })
 		end,
 	},
@@ -461,8 +406,12 @@ require("lazy").setup({
 		opts = {},
 		config = function ()
 			require("overseer").setup({
-				templates = { "builtin" },
+				templates = { "user.zig_build" },
 			})
+
+			vim.keymap.set("n", "<leader>b", "<cmd>OverseerRun<CR>",
+				{ desc = "[B]uild code" })
+
 		end,
 	},
 	-- {
