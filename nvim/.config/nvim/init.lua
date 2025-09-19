@@ -43,18 +43,33 @@ local function enter_terminal()
 		if term_win >= 0 then
 			vim.api.nvim_set_current_win(term_win)
 		else
-			print("no terminal window, you gotta set this up")
+			vim.cmd("vsplit | term")
+			local term_win = find_term_win()
+			vim.api.nvim_set_current_win(term_win)
 		end
 		type_keys("A")
 	else
 		vim.cmd("vsplit | term")
-		term_buff = find_term_buff()
-		assert(term_buff >= 0, "Term should exist")
+		local term_win = find_term_win()
+		vim.api.nvim_set_current_win(term_win)
 		type_keys("A")
 	end
 end
 
--- vim.keymap.set("n", "<leader>k", "<C-w><C-l>A<C-c><up><up><CR><C-\\><C-n><C-w><C-h>", { desc = "Run last command in terminal"})
+local function run_terminal_command(command)
+	local curr_win = vim.api.nvim_get_current_win()
+	enter_terminal()
+  local hell = function ()
+    type_keys("<C-c><up>" .. command .. "<CR>")
+    -- vim.schedule()
+  end
+  vim.schedule(hell)
+	-- vim.api.nvim_set_current_win(curr_win)
+end
+
+vim.keymap.set("n", "<leader>k", function ()
+	run_terminal_command("zig build -Dtarget=x86_64-windows-gnu run")
+end, { desc = "Run last command in terminal"})
 
 vim.keymap.set("n", "<leader>cl", function ()
 	local curr_win = vim.api.nvim_get_current_win()
