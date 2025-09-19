@@ -140,11 +140,6 @@ config.keys = {
 		mods = 'CTRL',
 		action = act.SpawnTab 'CurrentPaneDomain',
 	},
-	{
-		key = 'w',
-		mods = 'CTRL',
-		action = act.CloseCurrentTab { confirm = true },
-	},
 	-- Scroll
 	{ key = 'PageUp',   action = act.DisableDefaultAssignment },
 	{ key = 'PageDown', action = act.DisableDefaultAssignment },
