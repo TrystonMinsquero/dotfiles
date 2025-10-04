@@ -550,6 +550,7 @@ require("lazy").setup({
 
 					map("<leader>lh", vim.lsp.buf.hover, "Show [h]over")
 					map("K", vim.lsp.buf.hover, "Show [h]over")
+          map("<C-l>", "<cmd>LspClangdSwitchSourceHeader<CR>", "Switch Source Header")
 
 					-- Find references for the word under your cursor.
 					map("<leader>lr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
