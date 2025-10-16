@@ -17,11 +17,15 @@ vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" }
 -- Ctrl+S as god intended
 vim.keymap.set("n", "<C-s>", "<cmd>:w<CR>")
 
+vim.keymap.set("n", "<C-a>", "ggVG", { desc = "Select [A]ll"})
+
 vim.api.nvim_create_user_command("E", "Explore", {})
 vim.keymap.set("n", "<leader>e", ":Explore<CR>", { desc = "[E]xplore"})
 
 vim.keymap.set("n", "<leader>w", ":w<CR>", { desc = "[W]rite"})
 vim.keymap.set("n", "<leader>v", ":e $MYVIMRC<CR>", { desc = "Edit [Vim] config"})
+
+vim.keymap.set({'n', 'i', 'v'}, "<C-p>", "<C-r>*", { desc = "Paste Default Register"} )
 
 -- vim.keymap.set("n", "<left>", "<C-w><C-h>", { desc = "Move focus to the left window" })
 -- vim.keymap.set("n", "<down>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
@@ -33,3 +37,13 @@ vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right win
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
 
+-- Tabbing 
+vim.keymap.set({"n", "v"}, "<leader>tt", function ()
+	vim.o.expandtab = not vim.o.expandtab
+end, { desc = "[T]oggle [T]ab", silent = true })
+vim.keymap.set("v", "<leader>r", "<cmd>'<,'>retab!<CR>", { desc = "retab", silent = true })
+
+vim.keymap.set("v", "<S-Tab>", "<gv", { desc = "Indent left", silent = true })
+vim.keymap.set("v", "<Tab>", ">gv", { desc = "Indent right", silent = true })
+vim.keymap.set("n", "<S-Tab>", "V<", { desc = "Indent left", silent = true })
+vim.keymap.set("n", "<Tab>", "V>", { desc = "Indent right", silent = true })
