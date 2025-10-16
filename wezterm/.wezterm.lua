@@ -164,6 +164,11 @@ config.keys = {
 			window:set_config_overrides(overrides)
 		end),
 	},
+	{
+		key = "Backspace",
+		mods = wezterm.target_triple:find("apple") and "ALT" or "CTRL",
+		action = wezterm.action.SendKey { key = "w", mods = "CTRL" }
+	}
 }
 
 -- For example, changing the color scheme:
