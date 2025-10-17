@@ -69,13 +69,12 @@ end)
 -- keymaps
 
 
-config.keys = {
-	-- Navigate Splits
+config.keys = {-- Navigate Splits
 	{
 		key = "h",
 		mods = "CTRL|ALT",
-		action = act.ActivatePaneDirection "Left",
-	},
+		action = act.ActivatePaneDirection "Left",,
+  {key="Enter", mods="SHIFT", action=wezterm.action{SendString="\x1b\r"}},},
 	{
 		key = "j",
 		mods = "CTRL|ALT",
@@ -139,6 +138,9 @@ config.keys = {
 		key = 't',
 		mods = 'CTRL',
 		action = act.SpawnTab 'CurrentPaneDomain',
+	},
+	{
+		key = 'q', mods = 'CTRL|ALT',  action = act.QuitApplication,
 	},
 	-- Scroll
 	{ key = 'PageUp',   action = act.DisableDefaultAssignment },
@@ -225,7 +227,9 @@ config.window_frame = {
 -- config.window_decorations = "INTEGRATED_BUTTONS | RESIZE"
 config.window_decorations = "NONE | RESIZE"
 if wezterm.target_triple:find("windows") then
-  config.default_prog = { 'powershell.exe', "-NoLogo" }
+	print("windows!")
+	config.default_prog = { 'powershell.exe', "-NoLogo" }
+	config.default_domain = 'WSL:Ubuntu'
 end
 
 config.initial_cols = 80

@@ -105,6 +105,15 @@ alias installconf="nvim ~/dotfiles/install.sh"
 
 export PATH="/snap/bin/:$PATH"
 
+# Useful for having machine specific configs
 if [ -f "$HOME/.zshrc_extra" ]; then
     source "$HOME/.zshrc_extra"
+fi
+
+if [ -f ~/.fzf.zsh ]; then 
+	# Use install version of fzf if it exists
+	source ~/.fzf.zsh
+else
+	# Set up fzf key bindings and fuzzy completion
+	source <(fzf --zsh)
 fi

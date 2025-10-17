@@ -36,7 +36,7 @@ local function type_keys(key_str)
 	vim.api.nvim_feedkeys(keys, "n", false)
 end
 
-local function enter_terminal()
+local function open_terminal()
 	local term_buff = find_term_buff()
 	if term_buff >= 0 then
 		local term_win = find_term_win()
@@ -47,23 +47,22 @@ local function enter_terminal()
 			local term_win = find_term_win()
 			vim.api.nvim_set_current_win(term_win)
 		end
-		type_keys("A")
 	else
 		vim.cmd("vsplit | term")
 		local term_win = find_term_win()
 		vim.api.nvim_set_current_win(term_win)
-		type_keys("A")
 	end
+end
+
+local function enter_terminal()
+  open_terminal()
+  type_keys("A")
 end
 
 local function run_terminal_command(command)
 	local curr_win = vim.api.nvim_get_current_win()
-	enter_terminal()
-  local hell = function ()
-    type_keys("<C-c><up>" .. command .. "<CR>")
-    -- vim.schedule()
-  end
-  vim.schedule(hell)
+	open_terminal()
+  type_keys("<C-c><up>" .. command .. "<CR>")
 	-- vim.api.nvim_set_current_win(curr_win)
 end
 
@@ -71,19 +70,36 @@ vim.keymap.set("n", "<leader>k", function ()
 	run_terminal_command("zig build -Dtarget=x86_64-windows-gnu run")
 end, { desc = "Run last command in terminal"})
 
-vim.keymap.set("n", "<leader>cl", function ()
+local function run_last_command()
 	local curr_win = vim.api.nvim_get_current_win()
-	enter_terminal()
-	type_keys("<C-c><up><up><CR>")
-	vim.api.nvim_set_current_win(curr_win)
-	-- local term_buff = find_term_buff()
-end, { desc = "[C]onsole run [L]ast"})
+	open_terminal()
+	type_keys("A<C-c><up><up><CR><esc><esc>")
+	vim.schedule(function ()
+		vim.api.nvim_set_current_win(curr_win)
+  end)
+end
+
+vim.keymap.set("n", "<leader>r", function ()
+	vim.cmd.write { '%', bang = true }
+	run_last_command()
+end, { desc = "[R]un last"})
+
+
+vim.keymap.set("n", "<leader>cl", run_last_command, { desc = "[C]onsole run [L]ast"})
 
 vim.keymap.set("n", "<leader>co", enter_terminal, { desc = "[C]onsole [O]pen" })
 
 
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
 	callback = function()
+		local fileTypes = { ".lua" }
+		for _, fileType in ipairs(fileTypes) do
+			if vim.api.nvim_buf_get_name(0):sub(-#fileType) == fileType then
+				print("noet")
+				vim.expandtab = false
+				return
+			end
+		end
 		vim.bo.tabstop = 4
 		vim.bo.shiftwidth = 4
 		vim.bo.expandtab = false
@@ -699,7 +715,14 @@ require("lazy").setup({
 				-- clangd = {},
 				-- gopls = {},
 				-- pyright = {},
-
+				biome = {
+					filetypes = {
+						"js",
+						"astro", "css", "graphql", "html", "javascript",
+						"javascriptreact", "json", "jsonc", "svelte",
+						"typescript", "typescript.tsx", "typescriptreact", "vue"
+					}
+				},
 				lua_ls = {
 					-- cmd = { ... },
 					-- filetypes = { ... },
@@ -709,6 +732,13 @@ require("lazy").setup({
 							completion = {
 								callSnippet = "Replace",
 							},
+							format = {
+								enable = false,
+								defaultConfig = {
+									indent_style = "tab",
+                  indent_size = "2",
+								}
+							}
 							-- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
 							-- diagnostics = { disable = { 'missing-fields' } },
 						},
@@ -719,20 +749,62 @@ require("lazy").setup({
 			vim.list_extend(ensure_installed, {
 				"stylua", -- Used to format Lua code
 			})
-			require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
+			-- require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
 
+      vim.lsp.config["stylua"] = {
+				syntax = "All",
+				column_width = 120,
+				line_endings = "Unix",
+				indent_type = "Tabs",
+				indent_width = 4,
+				quote_style = "AutoPreferDouble",
+				call_parentheses = "Always",
+				collapse_simple_statement = "Never",
+				space_after_function_names = "Never",
+				block_newline_gaps = "Never",
+			}
+      -- vim.lsp.config["stylua"]
 			require("mason-lspconfig").setup({
-				ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
+				ensure_installed = { "lua_ls", "stylua", "clangd"}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
 				automatic_installation = false,
 				handlers = {
 					function(server_name)
-						local server = servers[server_name] or {}
-						-- This handles overriding only values explicitly passed
-						-- by the server configuration above. Useful when disabling
-						-- certain features of an LSP (for example, turning off formatting for ts_ls)
-						server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-						require("lspconfig")[server_name].setup(server)
+						require("lspconfig")[server_name].setup({})
 					end,
+					-- Custom configuration for lua_ls
+					["lua_ls"] = function()
+						require("lspconfig").lua_ls.setup({
+							settings = {
+								Lua = {
+									completion = {
+										callSnippet = "Replace",
+									},
+									format = {
+										enable = false,
+										defaultConfig = {
+											indent_style = "tab",
+											indent_size = "2",
+										},
+									},
+									diagnostics = {
+										globals = { 'vim' },
+									},
+								},
+							},
+						})
+					end,
+					-- Custom configuration for another LSP (e.g., rust_analyzer)
+					-- ["rust_analyzer"] = function()
+					-- 	require("lspconfig").rust_analyzer.setup({
+					-- 		settings = {
+					-- 			["rust-analyzer"] = {
+					-- 				checkOnSave = {
+					-- 					command = "clippy",
+					-- 				},
+					-- 			},
+					-- 		},
+					-- 	})
+					-- end,
 				},
 			})
 		end,
@@ -753,7 +825,7 @@ require("lazy").setup({
 			},
 		},
 		opts = {
-			notify_on_error = false,
+			notify_on_error = true,
 			-- format_on_save = function(bufnr)
 			--	-- Disable "format_on_save lsp_fallback" for languages that don't
 			--	-- have a well standardized coding style. You can add additional
