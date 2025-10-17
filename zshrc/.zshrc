@@ -95,6 +95,8 @@ alias pbcopy="xlip -selection current"
 alias py="python3"
 alias lg="lazygit"
 
+export EDITOR="nvim"
+
 # App Shortcuts
 alias todo="nvim ~/.todo.md"
 alias zshconf="nvim ~/.zshrc"
@@ -104,6 +106,7 @@ alias ghosttyconf="nvim ~/.config/ghostty/config"
 alias installconf="nvim ~/dotfiles/install.sh"
 
 export PATH="/snap/bin/:$PATH"
+export XDG_CONFIG_HOME="$HOME/.config"
 
 # Useful for having machine specific configs
 if [ -f "$HOME/.zshrc_extra" ]; then
