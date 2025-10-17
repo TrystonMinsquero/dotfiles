@@ -370,6 +370,9 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>s.", builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
 			vim.keymap.set("n", "<leader><leader>", builtin.buffers, { desc = "[ ] Find existing buffers" })
 
+      vim.keymap.set('n', '<C-q>', function()
+        require('telescope.builtin').send_selection_to_qflist(true) -- true sends the whole list if nothing is selected
+      end, { desc = "Send Telescope selection to quickfix" })
 			-- Slightly advanced example of overriding default behavior and theme
 			vim.keymap.set("n", "<leader>/", function()
 				-- You can pass additional configuration to Telescope to change the theme, layout, etc.
@@ -563,13 +566,16 @@ require("lazy").setup({
 					-- Execute a code action, usually your cursor needs to be on top of an error
 					-- or a suggestion from your LSP for this to activate.
 					map("<leader>la", vim.lsp.buf.code_action, "[G]oto Code [A]ction", { "n", "x" })
+					map("<leader>a", vim.lsp.buf.code_action, "[G]oto Code [A]ction", { "n", "x" })
 
 					map("<leader>lh", vim.lsp.buf.hover, "Show [h]over")
 					map("K", vim.lsp.buf.hover, "Show [h]over")
-          map("<C-l>", "<cmd>LspClangdSwitchSourceHeader<CR>", "Switch Source Header")
+          map("<leader>ls", "<cmd>LspClangdSwitchSourceHeader<CR>", "[S]witch Source Header")
 
 					-- Find references for the word under your cursor.
 					map("<leader>lr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
+					map("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
+					map("<C-c>", require("telescope.builtin").lsp_references, "Show [C]allers")
 
 					-- Jump to the implementation of the word under your cursor.
 					--  Useful when your language has ways of declaring types without an actual implementation.
