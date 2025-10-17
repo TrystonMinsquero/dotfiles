@@ -16,6 +16,9 @@ vim.g.have_nerd_font = false
 vim.o.number = true
 vim.o.relativenumber = true -- TODO: Is this really good?
 
+vim.o.wrap = true
+vim.o.linebreak = true
+
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = "a"
 
