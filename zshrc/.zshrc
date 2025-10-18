@@ -100,6 +100,7 @@ export EDITOR="nvim"
 # App Shortcuts
 alias todo="nvim ~/.todo.md"
 alias zshconf="nvim ~/.zshrc"
+alias zshex="nvim ~/.zshrc_extra"
 alias zshreload="source ~/.zshrc"
 alias nvimconf="nvim ~/.config/nvim/init.lua"
 alias ghosttyconf="nvim ~/.config/ghostty/config"
@@ -108,15 +109,15 @@ alias installconf="nvim ~/dotfiles/install.sh"
 export PATH="/snap/bin/:$PATH"
 export XDG_CONFIG_HOME="$HOME/.config"
 
-# Useful for having machine specific configs
-if [ -f "$HOME/.zshrc_extra" ]; then
-    source "$HOME/.zshrc_extra"
-fi
-
 if [ -f ~/.fzf.zsh ]; then 
 	# Use install version of fzf if it exists
 	source ~/.fzf.zsh
 else
 	# Set up fzf key bindings and fuzzy completion
 	source <(fzf --zsh)
+fi
+
+# Useful for having machine specific configs
+if [ -f "$HOME/.zshrc_extra" ]; then
+    source "$HOME/.zshrc_extra"
 fi
