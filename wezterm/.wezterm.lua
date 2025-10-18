@@ -73,8 +73,8 @@ config.keys = {-- Navigate Splits
 	{
 		key = "h",
 		mods = "CTRL|ALT",
-		action = act.ActivatePaneDirection "Left",,
-  {key="Enter", mods="SHIFT", action=wezterm.action{SendString="\x1b\r"}},},
+		action = act.ActivatePaneDirection "Left",
+	},
 	{
 		key = "j",
 		mods = "CTRL|ALT",
@@ -169,8 +169,8 @@ config.keys = {-- Navigate Splits
 	{
 		key = "Backspace",
 		mods = wezterm.target_triple:find("apple") and "ALT" or "CTRL",
-		action = wezterm.action.SendKey { key = "w", mods = "CTRL" }
-	}
+		action = wezterm.action.SendKey { key = "w", mods = "CTRL" },
+	},
 }
 
 -- For example, changing the color scheme:
