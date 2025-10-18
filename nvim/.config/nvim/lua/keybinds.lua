@@ -47,3 +47,5 @@ vim.keymap.set("v", "<S-Tab>", "<gv", { desc = "Indent left", silent = true })
 vim.keymap.set("v", "<Tab>", ">gv", { desc = "Indent right", silent = true })
 vim.keymap.set("n", "<S-Tab>", "V<", { desc = "Indent left", silent = true })
 vim.keymap.set("n", "<Tab>", "V>", { desc = "Indent right", silent = true })
+
+vim.keymap.set("n", "<C-i>", "<C-i>", { desc = "Jump Forward", silent = true })
