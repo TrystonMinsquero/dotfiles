@@ -73,10 +73,15 @@ end, { desc = "Run last command in terminal"})
 local function run_last_command()
 	local curr_win = vim.api.nvim_get_current_win()
 	open_terminal()
-	type_keys("A<C-c><up><up><CR><esc><esc>")
+	type_keys("A<C-c><up><up><CR><esc><esc>G")
 	vim.schedule(function ()
 		vim.api.nvim_set_current_win(curr_win)
   end)
+end
+
+local function type_last_command()
+	open_terminal()
+	type_keys("A<C-c><up><up>")
 end
 
 vim.keymap.set("n", "<leader>r", function ()
@@ -85,7 +90,7 @@ vim.keymap.set("n", "<leader>r", function ()
 end, { desc = "[R]un last"})
 
 
-vim.keymap.set("n", "<leader>cl", run_last_command, { desc = "[C]onsole run [L]ast"})
+vim.keymap.set("n", "<leader>cl", type_last_command, { desc = "[C]onsole run [L]ast"})
 
 vim.keymap.set("n", "<leader>co", enter_terminal, { desc = "[C]onsole [O]pen" })
 
