@@ -774,48 +774,9 @@ require("lazy").setup({
 				space_after_function_names = "Never",
 				block_newline_gaps = "Never",
 			}
-      -- vim.lsp.config["stylua"]
-			require("mason-lspconfig").setup({
-				ensure_installed = { "lua_ls", "stylua", "clangd"}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
-				automatic_installation = false,
-				handlers = {
-					function(server_name)
-						require("lspconfig")[server_name].setup({})
-					end,
-					-- Custom configuration for lua_ls
-					["lua_ls"] = function()
-						require("lspconfig").lua_ls.setup({
-							settings = {
-								Lua = {
-									completion = {
-										callSnippet = "Replace",
-									},
-									format = {
-										enable = false,
-										defaultConfig = {
-											indent_style = "tab",
-											indent_size = "2",
-										},
-									},
-									diagnostics = {
-										globals = { 'vim' },
-									},
-								},
-							},
-						})
-					end,
-					-- Custom configuration for another LSP (e.g., rust_analyzer)
-					-- ["rust_analyzer"] = function()
-					-- 	require("lspconfig").rust_analyzer.setup({
-					-- 		settings = {
-					-- 			["rust-analyzer"] = {
-					-- 				checkOnSave = {
-					-- 					command = "clippy",
-					-- 				},
-					-- 			},
-					-- 		},
-					-- 	})
-					-- end,
+
+			setup_woz_json()
+
 			require('lspconfig').harper_ls.setup({
 				filetypes = {
 					"markdown", "md"
