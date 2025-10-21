@@ -775,8 +775,6 @@ require("lazy").setup({
 				block_newline_gaps = "Never",
 			}
 
-			setup_woz_json()
-
 			require('lspconfig').harper_ls.setup({
 				filetypes = {
 					"markdown", "md"
