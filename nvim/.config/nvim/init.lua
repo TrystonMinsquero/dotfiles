@@ -44,7 +44,7 @@ local function open_terminal()
 			vim.api.nvim_set_current_win(term_win)
 		else
 			vim.cmd("vsplit | term")
-			local term_win = find_term_win()
+			term_win = find_term_win()
 			vim.api.nvim_set_current_win(term_win)
 		end
 	else
@@ -816,8 +816,49 @@ require("lazy").setup({
 					-- 		},
 					-- 	})
 					-- end,
+			require('lspconfig').harper_ls.setup({
+				filetypes = {
+					"markdown", "md"
 				},
+				settings = {
+					linters = {
+						SpellCheck = true,
+						SpelledNumbers = false,
+						AnA = true,
+						SentenceCapitalization = true,
+						UnclosedQuotes = true,
+						WrongQuotes = false,
+						LongSentences = true,
+						RepeatedWords = true,
+						Spaces = true,
+						Matcher = true,
+						CorrectNumberSuffix = true
+					},
+					codeActions = {
+						ForceStable = false
+					},
+					markdown = {
+						IgnoreLinkTitle = false
+					},
+					diagnosticSeverity = "hint",
+					isolateEnglish = false,
+					dialect = "American",
+					maxFileLength = 120000,
+					ignoredLintsPath = {}
+				}
 			})
+
+			local function toggle_spell_check ()
+				local clients = vim.lsp.get_clients({ name = "harper_ls", bufnr = 0 })
+				if #clients <= 0 then
+					vim.lsp.start({ name = "harper_ls", cmd = { "harper-ls", "--stdio" }}, { bufnr = 0 })
+				else
+					assert(#clients == 1)
+					vim.lsp.buf_detach_client(0, clients[1].id)
+				end
+			end
+			vim.keymap.set("n", "<leader>ts", toggle_spell_check , { desc = "[T]oggle [S]pellcheck"})
+
 		end,
 	},
 
