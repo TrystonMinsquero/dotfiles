@@ -95,21 +95,21 @@ vim.keymap.set("n", "<leader>cl", type_last_command, { desc = "[C]onsole run [L]
 vim.keymap.set("n", "<leader>co", enter_terminal, { desc = "[C]onsole [O]pen" })
 
 
-vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
-	callback = function()
-		local fileTypes = { ".lua" }
-		for _, fileType in ipairs(fileTypes) do
-			if vim.api.nvim_buf_get_name(0):sub(-#fileType) == fileType then
-				print("noet")
-				vim.expandtab = false
-				return
-			end
-		end
-		vim.bo.tabstop = 4
-		vim.bo.shiftwidth = 4
-		vim.bo.expandtab = false
-	end,
-})
+-- vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+-- 	callback = function()
+-- 		local fileTypes = { ".lua" }
+-- 		for _, fileType in ipairs(fileTypes) do
+-- 			if vim.api.nvim_buf_get_name(0):sub(-#fileType) == fileType then
+-- 				print("noet")
+-- 				vim.expandtab = false
+-- 				return
+-- 			end
+-- 		end
+-- 		vim.bo.tabstop = 4
+-- 		vim.bo.shiftwidth = 4
+-- 		vim.bo.expandtab = false
+-- 	end,
+-- })
 
 -- Highlight when yanking (copying) text
 --  Try it with `yap` in normal mode
@@ -859,6 +859,85 @@ require("lazy").setup({
 			end
 			vim.keymap.set("n", "<leader>ts", toggle_spell_check , { desc = "[T]oggle [S]pellcheck"})
 
+			require('lspconfig').lua_ls.setup({
+				-- cmd = { ... },
+				-- filetypes = { ... },
+				-- capabilities = {},
+				-- settings = {
+					-- Lua = {
+					{
+						completion = {
+							callSnippet = "Replace",
+						},
+						format = {
+							enable = false,
+							defaultConfig = {
+								indent_style = "tab",
+								indent_size = "2",
+							}
+						}
+						-- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
+						-- diagnostics = { disable = { 'missing-fields' } },
+					},
+				-- },
+			})
+
+			require('lspconfig').stylua.setup({
+				syntax = "All",
+				column_width = 120,
+				line_endings = "Unix",
+				indent_type = "Tabs",
+				indent_width = 4,
+				quote_style = "AutoPreferDouble",
+				call_parentheses = "Always",
+				collapse_simple_statement = "Never",
+				space_after_function_names = "Never",
+				block_newline_gaps = "Never",
+			})
+
+			-- require("mason-lspconfig").setup({
+			-- 	ensure_installed = { "lua_ls", "stylua", "clangd"}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
+			-- 	automatic_installation = false,
+			-- 	handlers = {
+			-- 		function(server_name)
+			-- 			require("lspconfig")[server_name].setup({})
+			-- 		end,
+			-- 		-- Custom configuration for lua_ls
+			-- 		["lua_ls"] = function()
+			-- 			require("lspconfig").lua_ls.setup({
+			-- 				settings = {
+			-- 					Lua = {
+			-- 						completion = {
+			-- 							callSnippet = "Replace",
+			-- 						},
+			-- 						format = {
+			-- 							enable = false,
+			-- 							defaultConfig = {
+			-- 								indent_style = "tab",
+			-- 								indent_size = "2",
+			-- 							},
+			-- 						},
+			-- 						diagnostics = {
+			-- 							globals = { 'vim' },
+			-- 						},
+			-- 					},
+			-- 				},
+			-- 			})
+			-- 		end,
+			-- 		-- Custom configuration for another LSP (e.g., rust_analyzer)
+			-- 		-- ["rust_analyzer"] = function()
+			-- 		-- 	require("lspconfig").rust_analyzer.setup({
+			-- 		-- 		settings = {
+			-- 		-- 			["rust-analyzer"] = {
+			-- 		-- 				checkOnSave = {
+			-- 		-- 					command = "clippy",
+			-- 		-- 				},
+			-- 		-- 			},
+			-- 		-- 		},
+			-- 		-- 	})
+			-- 		-- end,
+			-- 	},
+			-- })
 		end,
 	},
 
