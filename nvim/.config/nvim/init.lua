@@ -86,20 +86,20 @@ require("lazy").setup({
 					gitsigns.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
 				end, { desc = 'git [r]eset hunk' })
 				-- normal mode
-				map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'git [s]tage hunk' })
-				map('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'git [r]eset hunk' })
-				map('n', '<leader>hS', gitsigns.stage_buffer, { desc = 'git [S]tage buffer' })
-				map('n', '<leader>hu', gitsigns.stage_hunk, { desc = 'git [u]ndo stage hunk' })
-				map('n', '<leader>hR', gitsigns.reset_buffer, { desc = 'git [R]eset buffer' })
-				map('n', '<leader>hp', gitsigns.preview_hunk, { desc = 'git [p]review hunk' })
-				map('n', '<leader>hb', gitsigns.blame_line, { desc = 'git [b]lame line' })
-				map('n', '<leader>hd', gitsigns.diffthis, { desc = 'git [d]iff against index' })
-				map('n', '<leader>hD', function()
-					gitsigns.diffthis '@'
-				end, { desc = 'git [D]iff against last commit' })
+				map("n", "<leader>hs", gitsigns.stage_hunk, { desc = "git [s]tage hunk" })
+				map("n", "<leader>hr", gitsigns.reset_hunk, { desc = "git [r]eset hunk" })
+				map("n", "<leader>hS", gitsigns.stage_buffer, { desc = "git [S]tage buffer" })
+				map("n", "<leader>hu", gitsigns.stage_hunk, { desc = "git [u]ndo stage hunk" })
+				map("n", "<leader>hR", gitsigns.reset_buffer, { desc = "git [R]eset buffer" })
+				map("n", "<leader>hp", gitsigns.preview_hunk, { desc = "git [p]review hunk" })
+				map("n", "<leader>hb", gitsigns.blame_line, { desc = "git [b]lame line" })
+				map("n", "<leader>hd", gitsigns.diffthis, { desc = "git [d]iff against index" })
+				map("n", "<leader>hD", function()
+					gitsigns.diffthis("@")
+				end, { desc = "git [D]iff against last commit" })
 				-- Toggles
-				map('n', '<leader>tb', gitsigns.toggle_current_line_blame, { desc = '[T]oggle git show [b]lame line' })
-				map('n', '<leader>tD', gitsigns.preview_hunk_inline, { desc = '[T]oggle git show [D]eleted' })
+				map("n", "<leader>tb", gitsigns.toggle_current_line_blame, { desc = "[T]oggle git show [b]lame line" })
+				map("n", "<leader>tD", gitsigns.preview_hunk_inline, { desc = "[T]oggle git show [D]eleted" })
 			end,
 		},
 	},
@@ -308,42 +308,6 @@ require("lazy").setup({
 
 		end,
 	},
-	-- {
-	--	-- "CRAG666/code_runner.nvim",
-		-- config = function()
-		--	require("code_runner").setup({
-		--		filetype = {
-		--			java = { "cd $dir &&", "javac $fileName &&", "java $fileNameWithoutExt" },
-		--			python = "python3 -u",
-		--			-- rust = { "cd $dir &&", "rustc $fileName &&", "$dir/$fileNameWithoutExt" },
-		--			zig = function(...)
-		--				local root_dir = require("lspconfig").util.root_pattern("zig.build")(vim.loop.cwd())
-		--				return "cd " .. root_dir .. " && zig build run"
-		--			end,
-		--			cs = function(...)
-		--				local root_dir = require("lspconfig").util.root_pattern("*.csproj")(vim.loop.cwd())
-		--				return "cd " .. root_dir .. " && dotnet run$end"
-		--			end,
-		--		},
-		--		project = {
-		--			["~/dev/Zig-Sim"] = {
-		--				name = "Zig Simumlation",
-		--				description = "A simple project to try and learn zig",
-		--				command = "zig build run",
-		--			},
-		--		},
-		--		mode = "float",
-		--	})
-
-			-- vim.keymap.set("n", "<leader>rr", ":RunCode<CR>", { noremap = true, silent = false, desc = "[R]un Code" })
-			-- vim.keymap.set("n", "<leader>rf", ":RunFile<CR>", { noremap = true, silent = false })
-			-- vim.keymap.set("n", "<leader>rft", ":RunFile tab<CR>", { noremap = true, silent = false })
-			-- vim.keymap.set("n", "<leader>rp", ":RunProject<CR>", { noremap = true, silent = false })
-			-- vim.keymap.set("n", "<leader>rc", ":RunClose<CR>", { noremap = true, silent = false })
-			-- vim.keymap.set("n", "<leader>crf", ":CRFiletype<CR>", { noremap = true, silent = false })
-			-- vim.keymap.set("n", "<leader>crp", ":CRProjects<CR>", { noremap = true, silent = false })
-		-- end,
-	-- },
 	{
 		"kdheepak/lazygit.nvim",
 		lazy = true,
@@ -481,47 +445,8 @@ require("lazy").setup({
 						end
 					end
 
-					-- The following two autocommands are used to highlight references of the
-					-- word under your cursor when your cursor rests there for a little while.
-					--    See `:help CursorHold` for information about when this is executed
-					--
-					-- When you move your cursor, the highlights will be cleared (the second autocommand).
 					local client = vim.lsp.get_client_by_id(event.data.client_id)
-					if
-						client
-						and client_supports_method(
-							client,
-							vim.lsp.protocol.Methods.textDocument_documentHighlight,
-							event.buf
-						)
-					then
-						local highlight_augroup =
-							vim.api.nvim_create_augroup("kickstart-lsp-highlight", { clear = false })
-						vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-							buffer = event.buf,
-							group = highlight_augroup,
-							callback = vim.lsp.buf.document_highlight,
-						})
 
-						vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-							buffer = event.buf,
-							group = highlight_augroup,
-							callback = vim.lsp.buf.clear_references,
-						})
-
-						vim.api.nvim_create_autocmd("LspDetach", {
-							group = vim.api.nvim_create_augroup("kickstart-lsp-detach", { clear = true }),
-							callback = function(event2)
-								vim.lsp.buf.clear_references()
-								vim.api.nvim_clear_autocmds({ group = "kickstart-lsp-highlight", buffer = event2.buf })
-							end,
-						})
-					end
-
-					-- The following code creates a keymap to toggle inlay hints in your
-					-- code, if the language server you are using supports them
-					--
-					-- This may be unwanted, since they displace some of your code
 					if
 						client
 						and client_supports_method(client, vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf)
@@ -568,9 +493,6 @@ require("lazy").setup({
 			--  So, we create new capabilities with blink.cmp, and then broadcast that to the servers.
 			local capabilities = require("blink.cmp").get_lsp_capabilities()
 
-			-- Enable the following language servers
-			--  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
-			--
 			--  Add any additional override configuration in the following tables. Available keys are:
 			--  - cmd (table): Override the default command used to start the server
 			--  - filetypes (table): Override the default list of associated filetypes for the server
@@ -579,90 +501,50 @@ require("lazy").setup({
 			--        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
 			local servers = {
 				-- clangd = {},
-				-- gopls = {},
-				-- pyright = {},
-				biome = {
+				gopls = {},
+				harper_ls = {
 					filetypes = {
-						"js",
-						"astro", "css", "graphql", "html", "javascript",
-						"javascriptreact", "json", "jsonc", "svelte",
-						"typescript", "typescript.tsx", "typescriptreact", "vue"
-					}
+						"markdown",
+						"md",
+					},
 				},
+				pyrefly = {},
+
 				lua_ls = {
-					-- cmd = { ... },
-					-- filetypes = { ... },
-					-- capabilities = {},
 					settings = {
+						-- Info: https://luals.github.io/wiki/settings/
 						Lua = {
 							completion = {
 								callSnippet = "Replace",
 							},
-							format = {
-								enable = false,
-								defaultConfig = {
-									indent_style = "tab",
-                  indent_size = "2",
-								}
-							}
 							-- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
 							-- diagnostics = { disable = { 'missing-fields' } },
 						},
 					},
 				},
-			}
+			} -- Ensure the servers and tools above are installed
+
 			local ensure_installed = vim.tbl_keys(servers or {})
 			vim.list_extend(ensure_installed, {
 				"stylua", -- Used to format Lua code
 			})
-			-- require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
+			require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
 
-      vim.lsp.config["stylua"] = {
-				syntax = "All",
-				column_width = 120,
-				line_endings = "Unix",
-				indent_type = "Tabs",
-				indent_width = 4,
-				quote_style = "AutoPreferDouble",
-				call_parentheses = "Always",
-				collapse_simple_statement = "Never",
-				space_after_function_names = "Never",
-				block_newline_gaps = "Never",
-			}
-
-			require('lspconfig').harper_ls.setup({
-				filetypes = {
-					"markdown", "md"
-				},
-				settings = {
-					linters = {
-						SpellCheck = true,
-						SpelledNumbers = false,
-						AnA = true,
-						SentenceCapitalization = true,
-						UnclosedQuotes = true,
-						WrongQuotes = false,
-						LongSentences = true,
-						RepeatedWords = true,
-						Spaces = true,
-						Matcher = true,
-						CorrectNumberSuffix = true
-					},
-					codeActions = {
-						ForceStable = false
-					},
-					markdown = {
-						IgnoreLinkTitle = false
-					},
-					diagnosticSeverity = "hint",
-					isolateEnglish = false,
-					dialect = "American",
-					maxFileLength = 120000,
-					ignoredLintsPath = {}
-				}
+			require("mason-lspconfig").setup({
+				ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
+				automatic_installation = false,
 			})
 
-			local function toggle_spell_check ()
+			-- Setup configs for lsps
+			for key, value in pairs(servers) do
+				if vim.fn.has("nvim-0.11") == 1 then
+					vim.lsp.config(key, value)
+				else
+					require("lspconfig")[key].setup(value)
+				end
+			end
+
+			local function toggle_spell_check()
 				local clients = vim.lsp.get_clients({ name = "harper_ls", bufnr = 0 })
 				if #clients <= 0 then
 					vim.lsp.start({ name = "harper_ls", cmd = { "harper-ls", "--stdio" }}, { bufnr = 0 })
@@ -671,87 +553,7 @@ require("lazy").setup({
 					vim.lsp.buf_detach_client(0, clients[1].id)
 				end
 			end
-			vim.keymap.set("n", "<leader>ts", toggle_spell_check , { desc = "[T]oggle [S]pellcheck"})
-
-			require('lspconfig').lua_ls.setup({
-				-- cmd = { ... },
-				-- filetypes = { ... },
-				-- capabilities = {},
-				-- settings = {
-					-- Lua = {
-					{
-						completion = {
-							callSnippet = "Replace",
-						},
-						format = {
-							enable = false,
-							defaultConfig = {
-								indent_style = "tab",
-								indent_size = "2",
-							}
-						}
-						-- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-						-- diagnostics = { disable = { 'missing-fields' } },
-					},
-				-- },
-			})
-
-			require('lspconfig').stylua.setup({
-				syntax = "All",
-				column_width = 120,
-				line_endings = "Unix",
-				indent_type = "Tabs",
-				indent_width = 4,
-				quote_style = "AutoPreferDouble",
-				call_parentheses = "Always",
-				collapse_simple_statement = "Never",
-				space_after_function_names = "Never",
-				block_newline_gaps = "Never",
-			})
-
-			-- require("mason-lspconfig").setup({
-			-- 	ensure_installed = { "lua_ls", "stylua", "clangd"}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
-			-- 	automatic_installation = false,
-			-- 	handlers = {
-			-- 		function(server_name)
-			-- 			require("lspconfig")[server_name].setup({})
-			-- 		end,
-			-- 		-- Custom configuration for lua_ls
-			-- 		["lua_ls"] = function()
-			-- 			require("lspconfig").lua_ls.setup({
-			-- 				settings = {
-			-- 					Lua = {
-			-- 						completion = {
-			-- 							callSnippet = "Replace",
-			-- 						},
-			-- 						format = {
-			-- 							enable = false,
-			-- 							defaultConfig = {
-			-- 								indent_style = "tab",
-			-- 								indent_size = "2",
-			-- 							},
-			-- 						},
-			-- 						diagnostics = {
-			-- 							globals = { 'vim' },
-			-- 						},
-			-- 					},
-			-- 				},
-			-- 			})
-			-- 		end,
-			-- 		-- Custom configuration for another LSP (e.g., rust_analyzer)
-			-- 		-- ["rust_analyzer"] = function()
-			-- 		-- 	require("lspconfig").rust_analyzer.setup({
-			-- 		-- 		settings = {
-			-- 		-- 			["rust-analyzer"] = {
-			-- 		-- 				checkOnSave = {
-			-- 		-- 					command = "clippy",
-			-- 		-- 				},
-			-- 		-- 			},
-			-- 		-- 		},
-			-- 		-- 	})
-			-- 		-- end,
-			-- 	},
-			-- })
+			vim.keymap.set("n", "<leader>ts", toggle_spell_check, { desc = "[T]oggle [S]pellcheck" })
 		end,
 	},
 
@@ -771,20 +573,20 @@ require("lazy").setup({
 		},
 		opts = {
 			notify_on_error = true,
-			-- format_on_save = function(bufnr)
-			--	-- Disable "format_on_save lsp_fallback" for languages that don't
-			--	-- have a well standardized coding style. You can add additional
-			--	-- languages here or re-enable it for the disabled ones.
-			--	local disable_filetypes = { c = true, cpp = true }
-			--	if disable_filetypes[vim.bo[bufnr].filetype] then
-			--		return nil
-			--	else
-			--		return {
-			--			timeout_ms = 500,
-			--			lsp_format = "fallback",
-			--		}
-			--	end
-			-- end,
+			format_on_save = function(bufnr)
+				-- Disable "format_on_save lsp_fallback" for languages that don't
+				-- have a well standardized coding style. You can add additional
+				-- languages here or re-enable it for the disabled ones.
+				local disable_filetypes = { c = true, cpp = true }
+				if disable_filetypes[vim.bo[bufnr].filetype] then
+					return nil
+				else
+					return {
+						timeout_ms = 500,
+						lsp_format = "fallback",
+					}
+				end
+			end,
 			formatters_by_ft = {
 				lua = { "stylua" },
 				-- Conform can also run multiple formatters sequentially
