@@ -48,7 +48,7 @@ require("lazy").setup({
 				changedelete = { text = "~" },
 			},
 			on_attach = function(bufnr)
-				local gitsigns = require 'gitsigns'
+				local gitsigns = require("gitsigns")
 
 				local function map(mode, l, r, opts)
 					opts = opts or {}
@@ -58,33 +58,33 @@ require("lazy").setup({
 
 				local function nextChange()
 					if vim.wo.diff then
-						vim.cmd.normal { ']c', bang = true }
+						vim.cmd.normal({ "]c", bang = true })
 					else
-						gitsigns.nav_hunk 'next'
+						gitsigns.nav_hunk("next")
 					end
 				end
 
 				local function prevChange()
 					if vim.wo.diff then
-						vim.cmd.normal { '[c', bang = true }
+						vim.cmd.normal({ "[c", bang = true })
 					else
-						gitsigns.nav_hunk 'prev'
+						gitsigns.nav_hunk("prev")
 					end
 				end
 
 				-- Navigation
-				map('n', ']c', nextChange, { desc = 'Jump to next git [c]hange' })
-				map('n', '[c', prevChange, { desc = 'Jump to previous git [c]hange' })
-				map('n', '<leader>hn', nextChange, { desc = 'Jump to [n]ext git [c]hange' })
-				map('n', '<leader>hN', prevChange, { desc = 'Jump to previous git [c]hange' })
+				map("n", "]c", nextChange, { desc = "Jump to next git [c]hange" })
+				map("n", "[c", prevChange, { desc = "Jump to previous git [c]hange" })
+				map("n", "<leader>hn", nextChange, { desc = "Jump to [n]ext git [c]hange" })
+				map("n", "<leader>hN", prevChange, { desc = "Jump to previous git [c]hange" })
 				-- Actions
 				-- visual mode
-				map('v', '<leader>hs', function()
-					gitsigns.stage_hunk { vim.fn.line '.', vim.fn.line 'v' }
-				end, { desc = 'git [s]tage hunk' })
-				map('v', '<leader>hr', function()
-					gitsigns.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
-				end, { desc = 'git [r]eset hunk' })
+				map("v", "<leader>hs", function()
+					gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
+				end, { desc = "git [s]tage hunk" })
+				map("v", "<leader>hr", function()
+					gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
+				end, { desc = "git [r]eset hunk" })
 				-- normal mode
 				map("n", "<leader>hs", gitsigns.stage_hunk, { desc = "git [s]tage hunk" })
 				map("n", "<leader>hr", gitsigns.reset_hunk, { desc = "git [r]eset hunk" })
@@ -230,9 +230,9 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>s.", builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
 			vim.keymap.set("n", "<leader><leader>", builtin.buffers, { desc = "[ ] Find existing buffers" })
 
-      vim.keymap.set('n', '<C-q>', function()
-        require('telescope.builtin').send_selection_to_qflist(true) -- true sends the whole list if nothing is selected
-      end, { desc = "Send Telescope selection to quickfix" })
+			vim.keymap.set("n", "<C-q>", function()
+				require("telescope.builtin").send_selection_to_qflist(true) -- true sends the whole list if nothing is selected
+			end, { desc = "Send Telescope selection to quickfix" })
 			-- Slightly advanced example of overriding default behavior and theme
 			vim.keymap.set("n", "<leader>/", function()
 				-- You can pass additional configuration to Telescope to change the theme, layout, etc.
@@ -281,11 +281,11 @@ require("lazy").setup({
 	{
 		"lukas-reineke/virt-column.nvim",
 		opts = {},
-    event = "VimEnter",
+		event = "VimEnter",
 		config = function()
 			require("virt-column").setup({
-         virtcolumn = "+1,80"
-      })
+				virtcolumn = "+1,80",
+			})
 		end,
 	},
 	{
@@ -296,16 +296,14 @@ require("lazy").setup({
 		end,
 	},
 	{
-		'stevearc/overseer.nvim',
+		"stevearc/overseer.nvim",
 		opts = {},
-		config = function ()
+		config = function()
 			require("overseer").setup({
 				templates = { "user.zig_build" },
 			})
 
-			vim.keymap.set("n", "<leader>b", "<cmd>OverseerRun<CR>",
-				{ desc = "[B]uild code" })
-
+			vim.keymap.set("n", "<leader>b", "<cmd>OverseerRun<CR>", { desc = "[B]uild code" })
 		end,
 	},
 	{
@@ -394,7 +392,7 @@ require("lazy").setup({
 
 					map("<leader>lh", vim.lsp.buf.hover, "Show [h]over")
 					map("K", vim.lsp.buf.hover, "Show [h]over")
-          map("<leader>ls", "<cmd>LspClangdSwitchSourceHeader<CR>", "[S]witch Source Header")
+					map("<leader>ls", "<cmd>LspClangdSwitchSourceHeader<CR>", "[S]witch Source Header")
 
 					-- Find references for the word under your cursor.
 					map("<leader>lr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
@@ -498,7 +496,8 @@ require("lazy").setup({
 			--  - filetypes (table): Override the default list of associated filetypes for the server
 			--  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
 			--  - settings (table): Override the default settings passed when initializing the server.
-			--        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+			--				For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+			-- etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
 			local servers = {
 				-- clangd = {},
 				gopls = {},
@@ -547,7 +546,7 @@ require("lazy").setup({
 			local function toggle_spell_check()
 				local clients = vim.lsp.get_clients({ name = "harper_ls", bufnr = 0 })
 				if #clients <= 0 then
-					vim.lsp.start({ name = "harper_ls", cmd = { "harper-ls", "--stdio" }}, { bufnr = 0 })
+					vim.lsp.start({ name = "harper_ls", cmd = { "harper-ls", "--stdio" } }, { bufnr = 0 })
 				else
 					assert(#clients == 1)
 					vim.lsp.buf_detach_client(0, clients[1].id)
@@ -556,7 +555,6 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>ts", toggle_spell_check, { desc = "[T]oggle [S]pellcheck" })
 		end,
 	},
-
 	{ -- Autoformat
 		"stevearc/conform.nvim",
 		event = {},
@@ -702,9 +700,8 @@ require("lazy").setup({
 	},
 	{
 		"xiyaowong/transparent.nvim",
-		config = function ()
-			vim.keymap.set("n", "<leader>to", "<cmd>TransparentToggle<CR>", 
-				{ desc = "[T]oggle [O]pacity", })
+		config = function()
+			vim.keymap.set("n", "<leader>to", "<cmd>TransparentToggle<CR>", { desc = "[T]oggle [O]pacity" })
 		end,
 	},
 	-- Highlight todo, notes, etc in comments
