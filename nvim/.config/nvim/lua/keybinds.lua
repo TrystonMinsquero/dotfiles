@@ -23,7 +23,10 @@ vim.api.nvim_create_user_command("E", "Explore", {})
 vim.keymap.set("n", "<leader>e", ":Explore<CR>", { desc = "[E]xplore"})
 
 vim.keymap.set("n", "<leader>w", ":w<CR>", { desc = "[W]rite"})
-vim.keymap.set("n", "<leader>v", ":e $MYVIMRC<CR>", { desc = "Edit [Vim] config"})
+vim.keymap.set("n", "<leader>vi", ":e ~/.config/nvim/init.lua<CR>", { desc = "Edit [Vim] [I]nit config"})
+vim.keymap.set("n", "<leader>vk", ":e ~/.config/nvim/lua/console.lua<CR>", { desc = "Edit [Vim] [K]eybinds config"})
+vim.keymap.set("n", "<leader>vc", ":e ~/.config/nvim/lua/console.lua<CR>", { desc = "Edit [Vim] [C]onsole config"})
+vim.keymap.set("n", "<leader>vo", ":e ~/.config/nvim/lua/console.lua<CR>", { desc = "Edit [Vim] [O]ptions config"})
 
 vim.keymap.set({'n', 'i', 'v'}, "<C-p>", "<C-r>*", { desc = "Paste Default Register"} )
 
@@ -32,13 +35,13 @@ vim.keymap.set({'n', 'i', 'v'}, "<C-p>", "<C-r>*", { desc = "Paste Default Regis
 -- vim.keymap.set("n", "<up>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
 -- vim.keymap.set("n", "<right", "<C-w><C-l>", { desc = "Move focus to the right window" })
 --
--- vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move focus to the left window" })
--- vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })
--- vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
--- vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
+vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move focus to the left window" })
+vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })
+vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
+vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
 --
-vim.keymap.set("n", "<C-j>", "<cmd>cnext<CR>", { desc = "Move to next item in quick fix list" })
-vim.keymap.set("n", "<C-k>", "<cmd>cprev<CR>", { desc = "Move to previous item in quick fix list" })
+vim.keymap.set("n", "<C-n>", "<cmd>cnext<CR>", { desc = "Move to next item in quick fix list" })
+vim.keymap.set("n", "<C-S-n>", "<cmd>cprev<CR>", { desc = "Move to previous item in quick fix list" })
 
 -- Tabbing 
 vim.keymap.set({"n", "v"}, "<leader>tt", function ()
