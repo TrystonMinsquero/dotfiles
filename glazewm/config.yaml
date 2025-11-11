@@ -193,24 +193,33 @@ binding_modes:
 
 keybindings:
   # Shift focus in a given direction.
-  # - commands: ['focus --direction left']
-  #   bindings: ['alt+lwin+h', 'alt+lwin+left']
-  # - commands: ['focus --direction right']
-  #   bindings: ['alt+lwin+l', 'alt+lwin+right']
-  # - commands: ['focus --direction up']
-  #   bindings: ['alt+lwin+k', 'alt+lwin+up']
-  # - commands: ['focus --direction down']
-  #   bindings: ['alt+lwin+j', 'alt+lwin+down']
+  - commands: ['focus --direction left']
+    bindings: ['alt+lwin+h']
+  - commands: ['focus --direction right']
+    bindings: ['alt+lwin+l']
+  - commands: ['focus --direction up']
+    bindings: ['alt+lwin+k']
+  - commands: ['focus --direction down']
+    bindings: ['alt+lwin+j']
+
+  - commands: ['swap-workspace --workspace-in-direction left']
+    bindings: ['alt+lwin+left']
+  - commands: ['swap-workspace --workspace-in-direction right']
+    bindings: ['alt+lwin+right', alt+lwin+tab]
+  - commands: ['swap-workspace --workspace-in-direction up']
+    bindings: ['alt+lwin+up']
+  - commands: ['swap-workspace --workspace-in-direction down']
+    bindings: ['alt+lwin+down']
 
   # Move focused window in a given direction.
-  # - commands: ['move --direction left']
-  #   bindings: ['alt+lwin+shift+h', 'alt+lwin+shift+left']
-  # - commands: ['move --direction right']
-  #   bindings: ['alt+lwin+shift+l', 'alt+lwin+shift+right']
-  # - commands: ['move --direction up']
-  #   bindings: ['alt+lwin+shift+k', 'alt+lwin+shift+up']
-  # - commands: ['move --direction down']
-  #   bindings: ['alt+lwin+shift+j', 'alt+lwin+shift+down']
+  - commands: ['move --direction left']
+    bindings: ['alt+lwin+shift+h', 'alt+lwin+shift+left']
+  - commands: ['move --direction right']
+    bindings: ['alt+lwin+shift+l', 'alt+lwin+shift+right']
+  - commands: ['move --direction up']
+    bindings: ['alt+lwin+shift+k', 'alt+lwin+shift+up']
+  - commands: ['move --direction down']
+    bindings: ['alt+lwin+shift+j', 'alt+lwin+shift+down']
   #
   # Resize focused window by a percentage or pixel amount.
   # - commands: ['resize --width -2%']
@@ -235,8 +244,8 @@ keybindings:
 
   # Change tiling direction. This determines where new tiling windows will
   # be inserted.
-  # - commands: ['toggle-tiling-direction']
-  #   bindings: ['alt+lwin+v']
+  - commands: ['toggle-tiling-direction']
+    bindings: ['alt+lwin+shift+d']
 
   # Change focus from tiling windows -> floating -> fullscreen.
   - commands: ['wm-cycle-focus']
