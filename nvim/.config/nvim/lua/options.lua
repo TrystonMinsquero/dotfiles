@@ -52,9 +52,12 @@ vim.o.splitbelow = true
 vim.o.list = true
 vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 vim.o.inccommand = "split"
-vim.o.expandtab = false
-vim.opt.tabstop = 4
+vim.o.tabstop = 4
+vim.o.shiftwidth = 4
+vim.o.expandtab = true
 vim.o.cursorline = true
 vim.o.scrolloff = 8
 
 vim.o.confirm = true
+
+vim.o.shell = "/bin/zsh"

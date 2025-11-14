@@ -55,5 +55,3 @@ vim.keymap.set("v", "<leader>r", "<cmd>'<,'>retab!<CR>", { desc = "retab", silen
 vim.keymap.set("v", "<S-Tab>", "<gv", { desc = "Indent left", silent = true })
 vim.keymap.set("v", "<Tab>", ">gv", { desc = "Indent right", silent = true })
 
-vim.keymap.set("n", "<S-Tab>", "V<", { desc = "Indent left", silent = true })
-vim.keymap.set("n", "<Tab>", "V>", { desc = "Indent right", silent = true })
