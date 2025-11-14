@@ -30,7 +30,7 @@ config.cell_width = 0.9
 -- config.font = wezterm.font("Hack Regular")
 -- config.cell_width = 0.9
 
-local opacity = .75 -- Value is also used for toggling
+local opacity = 0.75 -- Value is also used for toggling
 config.window_background_opacity = opacity
 config.prefer_egl = true
 config.font_size = 14.0
@@ -68,27 +68,30 @@ end)
 
 -- keymaps
 
+wezterm.global_key_assignments = {
+	[{ modifiers = "CTRL|SHIFT", key = "N" }] = act.DisableDefaultAssignment,
+}
 
-config.keys = {-- Navigate Splits
+config.keys = { -- Navigate Splits
 	{
 		key = "h",
 		mods = "CTRL|ALT",
-		action = act.ActivatePaneDirection "Left",
+		action = act.ActivatePaneDirection("Left"),
 	},
 	{
 		key = "j",
 		mods = "CTRL|ALT",
-		action = act.ActivatePaneDirection "Down",
+		action = act.ActivatePaneDirection("Down"),
 	},
 	{
 		key = "k",
 		mods = "CTRL|ALT",
-		action = act.ActivatePaneDirection "Up",
+		action = act.ActivatePaneDirection("Up"),
 	},
 	{
 		key = "l",
 		mods = "CTRL|ALT",
-		action = act.ActivatePaneDirection "Right",
+		action = act.ActivatePaneDirection("Right"),
 	},
 	-- Adjust Split Sizes
 	{
@@ -121,34 +124,52 @@ config.keys = {-- Navigate Splits
 		}),
 	},
 	{
-		key = 't',
-		mods = 'CTRL|ALT',
+		key = "t",
+		mods = "CTRL|ALT",
 		action = act.SplitPane({
 			direction = "Right",
 			size = { Percent = 50 },
 		}),
 	},
 	{
-		key = 'w',
-		mods = 'CTRL|ALT',
-		action = act.CloseCurrentPane { confirm = true },
+		key = "w",
+		mods = "CTRL|ALT",
+		action = act.CloseCurrentPane({ confirm = true }),
 	},
 	-- Tab Management
 	{
-		key = 't',
-		mods = 'CTRL',
-		action = act.SpawnTab 'CurrentPaneDomain',
+		key = "N",
+		mods = "CTRL|SHIFT",
+		action = act.DisableDefaultAssignment,
 	},
 	{
-		key = 'q', mods = 'CTRL|ALT',  action = act.QuitApplication,
+		key = "t",
+		mods = "CTRL",
+		action = act.SpawnTab("CurrentPaneDomain"),
+	},
+	{
+		key = "q",
+		mods = "CTRL|ALT",
+		action = act.QuitApplication,
 	},
 	-- Scroll
-	{ key = 'PageUp',   action = act.DisableDefaultAssignment },
-	{ key = 'PageDown', action = act.DisableDefaultAssignment },
-	{ key = 'PageUp',   action = act.ScrollByPage(-0.5) },
-	{ key = 'PageDown', action = act.ScrollByPage(0.5) },
+	{ key = "PageUp", action = act.DisableDefaultAssignment },
+	{ key = "PageDown", action = act.DisableDefaultAssignment },
+	{ key = "PageUp", action = act.ScrollByPage(-0.5) },
+	{ key = "PageDown", action = act.ScrollByPage(0.5) },
+	{ key = "PageUp", mods = "SHIFT", action = act.ScrollByPage(-1.0) },
+	{ key = "PageDown", mods = "SHIFT", action = act.ScrollByPage(1.0) },
+	{
+		key = "s",
+		mods = "CTRL|ALT",
+		action = wezterm.action_callback(function(window, _)
+			local overrides = window:get_config_overrides() or {}
+			overrides.scroll_to_bottom_on_input = not overrides.scroll_to_bottom_on_input
+			window:set_config_overrides(overrides)
+		end),
+	},
 	-- Copy Mode
-	{ key = "y", mods="CTRL|ALT", action = act.ActivateCopyMode },
+	{ key = "y", mods = "CTRL|ALT", action = act.ActivateCopyMode },
 	-- Idk This was here
 	{ key = "9", mods = "CTRL", action = act.PaneSelect },
 	{ key = "L", mods = "CTRL", action = act.ShowDebugOverlay },
@@ -169,7 +190,7 @@ config.keys = {-- Navigate Splits
 	{
 		key = "Backspace",
 		mods = wezterm.target_triple:find("apple") and "ALT" or "CTRL",
-		action = wezterm.action.SendKey { key = "w", mods = "CTRL" },
+		action = wezterm.action.SendKey({ key = "w", mods = "CTRL" }),
 	},
 }
 
@@ -228,8 +249,8 @@ config.window_frame = {
 config.window_decorations = "NONE | RESIZE"
 if wezterm.target_triple:find("windows") then
 	print("windows!")
-	config.default_prog = { 'powershell.exe', "-NoLogo" }
-	config.default_domain = 'WSL:Ubuntu'
+	config.default_prog = { "powershell.exe", "-NoLogo" }
+	config.default_domain = "WSL:Ubuntu"
 end
 
 config.initial_cols = 80
