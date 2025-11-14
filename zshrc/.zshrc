@@ -36,6 +36,7 @@ alias pbcopy="xlip -selection current"
 
 alias py="python3"
 alias lg="lazygit"
+alias dot="cd ~/dotfiles"
 
 export EDITOR="nvim"
 
