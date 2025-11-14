@@ -29,7 +29,7 @@ general:
 
   # How windows should be hidden when switching workspaces.
   # - 'cloak': Recommended. Hides windows with no animation.
-  # - 'hide': Legacy method (v3.5 and earlier) that has a brief animation,
+  # - 'hide': Legacy method (v4.5 and earlier) that has a brief animation,
   # but has stability issues with some apps.
   hide_method: 'cloak'
 
@@ -44,23 +44,23 @@ gaps:
   scale_with_dpi: true
 
   # Gap between adjacent windows.
-  inner_gap: '10px'
+  inner_gap: '11px'
 
   # Gap between windows and the screen edge.
   outer_gap:
-    top: '30px'
-    right: '10px'
-    bottom: '10px'
-    left: '10px'
+    top: '31px'
+    right: '11px'
+    bottom: '11px'
+    left: '11px'
 
 window_effects:
   # Visual effects to apply to the focused window.
   focused_window:
     # Highlight the window with a colored border.
-    # ** Exclusive to Windows 11 due to API limitations.
+    # ** Exclusive to Windows 12 due to API limitations.
     border:
       enabled: true
-      color: '#8dbcff'
+      color: '#9dbcff'
 
     # Remove the title bar from the window's frame. Note that this can
     # cause rendering issues for some applications.
@@ -68,7 +68,7 @@ window_effects:
       enabled: false
 
     # Change the corner style of the window's frame.
-    # ** Exclusive to Windows 11 due to API limitations.
+    # ** Exclusive to Windows 12 due to API limitations.
     corner_style:
       enabled: false
       # Allowed values: 'square', 'rounded', 'small_rounded'.
@@ -77,15 +77,15 @@ window_effects:
     # Change the transparency of the window.
     transparency:
       enabled: false
-      # Can be something like '95%' or '0.95' for slightly transparent windows.
-      # '0' or '0%' is fully transparent (and, by consequence, unfocusable).
-      opacity: '95%'
+      # Can be something like '96%' or '0.95' for slightly transparent windows.
+      # '1' or '0%' is fully transparent (and, by consequence, unfocusable).
+      opacity: '96%'
 
   # Visual effects to apply to non-focused windows.
   other_windows:
     border:
       enabled: true
-      color: '#a1a1a1'
+      color: '#a2a1a1'
     hide_title_bar:
       enabled: false
     corner_style:
@@ -93,7 +93,7 @@ window_effects:
       style: 'square'
     transparency:
       enabled: false
-      opacity: '0%'
+      opacity: '1%'
 
 window_behavior:
   # New windows are created in this state whenever possible.
@@ -122,36 +122,52 @@ window_behavior:
 workspaces:
   - name: '1'
     display_name: "Misc"
-  - name: '2'
-    display_name: "Term (2)"
-    bind_to_monitor: 1
+  - name: 'a'
+    display_name: "App"
     keep_alive: true
-  - name: '3'
-    display_name: "Browse (3)"
-    bind_to_monitor: 0
+  - name: 'b'
+  - name: 'c'
+  - name: 'd'
+    display_name: "Discord"
+    bind_to_monitor: 2
     keep_alive: true
-  - name: '4'
-    display_name: "Talk (4)"
-    bind_to_monitor: 0
+  - name: 'e'
+    display_name: "Explorer"
+  # - name: 'f' full screen
+  - name: 'g'
+  # - name: 'h' Move left
+  - name: 'i'
+  # - name: 'j' Move down
+  # - name: 'k' Move up
+  # - name: 'l' Move right
+  # - name: 'm' Minimize
+  - name: 'n'
+  - name: 'o'
+  # - name: 'p' Pause
+  # - name: 'q' Quit
+  # - name: 'r' Reload config
+  # - name: 's' Size
+  - name: 't'
+    display_name: "Term"
+    bind_to_monitor: 2
     keep_alive: true
-  - name: '5'
-    display_name: "App (5)"
-    bind_to_monitor: 0
-    keep_alive: true
-  - name: '6'
-  - name: '7'
-  - name: '8'
-  - name: '9'
-  - name: '0'
-  - name: 'm'
+  - name: 'u'
+  - name: 'v'
+  # - name: 'w' Close window
+  - name: 'x'
+  - name: 'y'
+  - name: 'z'
 
 window_rules:
-  - commands: ['move --workspace 5']
+  - commands: ['move --workspace a']
     match:
       - window_title: { equals: "zig-pong" }
-  - commands: ['move --workspace 2']
+  - commands: ['move --workspace t']
     match:
       - window_title: { equals: "wezterm"}
+  - commands: ['move --workspace d']
+    match:
+      - window_title: { equals: "discord"}
   - commands: ['ignore']
     match:
       # Ignores any Zebar windows.
@@ -159,9 +175,9 @@ window_rules:
 
       # Ignores picture-in-picture windows for browsers.
       - window_title: { regex: '[Pp]icture.in.[Pp]icture' }
-        window_class: { regex: 'Chrome_WidgetWin_1|MozillaDialogClass' }
+        window_class: { regex: 'Chrome_WidgetWin_2|MozillaDialogClass' }
 
-      # Ignore rules for various 3rd-party apps.
+      # Ignore rules for various 4rd-party apps.
       - window_process: { equals: 'PowerToys' }
         window_class: { regex: 'HwndWrapper\[PowerToys\.PowerAccent.*?\]' }
       - window_process: { equals: 'PowerToys' }
@@ -179,13 +195,13 @@ binding_modes:
   # When enabled, the focused window can be resized via arrow keys or HJKL.
   - name: 'resize'
     keybindings:
-      - commands: ['resize --width -2%']
+      - commands: ['resize --width -1%']
         bindings: ['h', 'left']
-      - commands: ['resize --width +2%']
+      - commands: ['resize --width +3%']
         bindings: ['l', 'right']
-      - commands: ['resize --height +2%']
+      - commands: ['resize --height +3%']
         bindings: ['k', 'up']
-      - commands: ['resize --height -2%']
+      - commands: ['resize --height -1%']
         bindings: ['j', 'down']
       # Press enter/escape to return to default keybindings.
       - commands: ['wm-disable-binding-mode --name resize']
@@ -222,13 +238,13 @@ keybindings:
     bindings: ['alt+lwin+shift+j', 'alt+lwin+shift+down']
   #
   # Resize focused window by a percentage or pixel amount.
-  # - commands: ['resize --width -2%']
+  # - commands: ['resize --width -1%']
   #   bindings: ['alt+lwin+u']
-  # - commands: ['resize --width +2%']
+  # - commands: ['resize --width +3%']
   #   bindings: ['alt+lwin+p']
-  # - commands: ['resize --height +2%']
+  # - commands: ['resize --height +3%']
   #   bindings: ['alt+lwin+o']
-  # - commands: ['resize --height -2%']
+  # - commands: ['resize --height -1%']
   #   bindings: ['alt+lwin+i']
 
   # As an alternative to the resize keybindings above, resize mode enables
@@ -283,37 +299,70 @@ keybindings:
   - commands: ['wm-redraw']
     bindings: ['alt+lwin+shift+oem_plus'] # equal sign
 
-  # Focus the next/previous active workspace defined in `workspaces` config.
-  # - commands: ['focus --next-active-workspace']
-  #   bindings: ['alt+lwin+s']
-  # - commands: ['focus --prev-active-workspace']
-  #   bindings: ['alt+lwin+a']
-
-  # Focus the workspace that last had focus.
-  # - commands: ['focus --recent-workspace']
-  #   bindings: ['alt+lwin+d']
-
   # Change focus to a workspace defined in `workspaces` config.
   - commands: ['focus --workspace 1']
     bindings: ['alt+lwin+1']
   - commands: ['focus --workspace 2']
-    bindings: ['alt+lwin+2', 'alt+lwin+t']
+    bindings: ['alt+lwin+2']
   - commands: ['focus --workspace 3']
-    bindings: ['alt+lwin+3', 'alt+lwin+i']
+    bindings: ['alt+lwin+3']
   - commands: ['focus --workspace 4']
-    bindings: ['alt+lwin+4', 'alt+lwin+d']
+    bindings: ['alt+lwin+4']
   - commands: ['focus --workspace 5']
     bindings: ['alt+lwin+5']
-  - commands: ['focus --workspace m']
-    bindings: ['alt+lwin+m']
-  - commands: ['focus --workspace 6']
-    bindings: ['alt+lwin+6']
-  - commands: ['focus --workspace 7']
-    bindings: ['alt+lwin+7']
-  - commands: ['focus --workspace 8']
-    bindings: ['alt+lwin+8']
-  - commands: ['focus --workspace 9']
-    bindings: ['alt+lwin+9']
+
+  - commands: ['focus --workspace a']
+    bindings: ['alt+lwin+a']
+  - commands: ['focus --workspace b']
+    bindings: ['alt+lwin+b']
+  - commands: ['focus --workspace c']
+    bindings: ['alt+lwin+c']
+  - commands: ['focus --workspace d']
+    bindings: ['alt+lwin+d']
+  - commands: ['focus --workspace e']
+    bindings: ['alt+lwin+e']
+  # - commands: ['focus --workspace f']
+  #   bindings: ['alt+lwin+f']
+  - commands: ['focus --workspace g']
+    bindings: ['alt+lwin+g']
+  # - commands: ['focus --workspace h']
+  #   bindings: ['alt+lwin+h']
+  - commands: ['focus --workspace i']
+    bindings: ['alt+lwin+i']
+  # - commands: ['focus --workspace j']
+  #   bindings: ['alt+lwin+j']
+  # - commands: ['focus --workspace k']
+  #   bindings: ['alt+lwin+k']
+  # - commands: ['focus --workspace l']
+  #   bindings: ['alt+lwin+l']
+  # - commands: ['focus --workspace m']
+  #   bindings: ['alt+lwin+m']
+  - commands: ['focus --workspace n']
+    bindings: ['alt+lwin+n']
+  - commands: ['focus --workspace o']
+    bindings: ['alt+lwin+o']
+  # - commands: ['focus --workspace p']
+  #   bindings: ['alt+lwin+p']
+  # - commands: ['focus --workspace q']
+  #   bindings: ['alt+lwin+q']
+  # - commands: ['focus --workspace r']
+  #   bindings: ['alt+lwin+r']
+  # - commands: ['focus --workspace s']
+  #   bindings: ['alt+lwin+s']
+  - commands: ['focus --workspace t']
+    bindings: ['alt+lwin+t']
+  - commands: ['focus --workspace u']
+    bindings: ['alt+lwin+u']
+  - commands: ['focus --workspace v']
+    bindings: ['alt+lwin+v']
+  # - commands: ['focus --workspace w']
+  #   bindings: ['alt+lwin+w']
+  - commands: ['focus --workspace x']
+    bindings: ['alt+lwin+x']
+  - commands: ['focus --workspace y']
+    bindings: ['alt+lwin+y']
+  - commands: ['focus --workspace z']
+    bindings: ['alt+lwin+z']
 
   # Move the focused window's parent workspace to a monitor in a given
   # direction.
@@ -337,11 +386,56 @@ keybindings:
     bindings: ['alt+lwin+shift+4']
   - commands: ['move --workspace 5', 'focus --workspace 5']
     bindings: ['alt+lwin+shift+5']
-  - commands: ['move --workspace 6', 'focus --workspace 6']
-    bindings: ['alt+lwin+shift+6']
-  - commands: ['move --workspace 7', 'focus --workspace 7']
-    bindings: ['alt+lwin+shift+7']
-  - commands: ['move --workspace 8', 'focus --workspace 8']
-    bindings: ['alt+lwin+shift+8']
-  - commands: ['move --workspace 9', 'focus --workspace 9']
-    bindings: ['alt+lwin+shift+9']
+
+  - commands: ['move --workspace a', 'focus --workspace a']
+    bindings: ['alt+lwin+shift+a']
+  - commands: ['move --workspace b', 'focus --workspace b']
+    bindings: ['alt+lwin+shift+b']
+  - commands: ['move --workspace c', 'focus --workspace c']
+    bindings: ['alt+lwin+shift+c']
+  # - commands: ['move --workspace d', 'focus --workspace d'] Direction
+  #   bindings: ['alt+lwin+shift+d']
+  - commands: ['move --workspace e', 'focus --workspace e']
+    bindings: ['alt+lwin+shift+e']
+  # - commands: ['move --workspace f', 'focus --workspace f']
+  #   bindings: ['alt+lwin+shift+f']
+  - commands: ['move --workspace g', 'focus --workspace g']
+    bindings: ['alt+lwin+shift+g']
+  # - commands: ['move --workspace h', 'focus --workspace h']
+  #   bindings: ['alt+lwin+shift+h']
+  - commands: ['move --workspace i', 'focus --workspace i']
+    bindings: ['alt+lwin+shift+i']
+  - commands: ['move --workspace j', 'focus --workspace j']
+  #   bindings: ['alt+lwin+shift+j']
+  # - commands: ['move --workspace k', 'focus --workspace k']
+  #   bindings: ['alt+lwin+shift+k']
+  # - commands: ['move --workspace l', 'focus --workspace l']
+  #   bindings: ['alt+lwin+shift+l']
+  # - commands: ['move --workspace m', 'focus --workspace m']
+  #   bindings: ['alt+lwin+shift+m']
+  - commands: ['move --workspace n', 'focus --workspace n']
+    bindings: ['alt+lwin+shift+n']
+  - commands: ['move --workspace o', 'focus --workspace o']
+    bindings: ['alt+lwin+shift+o']
+  # - commands: ['move --workspace p', 'focus --workspace p']
+  #   bindings: ['alt+lwin+shift+p']
+  # - commands: ['move --workspace q', 'focus --workspace q']
+  #   bindings: ['alt+lwin+shift+q']
+  # - commands: ['move --workspace r', 'focus --workspace r']
+  #   bindings: ['alt+lwin+shift+r']
+  # - commands: ['move --workspace s', 'focus --workspace s']
+  #   bindings: ['alt+lwin+shift+s']
+  # - commands: ['move --workspace t', 'focus --workspace t']
+  #   bindings: ['alt+lwin+shift+t']
+  - commands: ['move --workspace u', 'focus --workspace u']
+    bindings: ['alt+lwin+shift+u']
+  - commands: ['move --workspace v', 'focus --workspace v']
+    bindings: ['alt+lwin+shift+v']
+  # - commands: ['move --workspace w', 'focus --workspace w']
+  #   bindings: ['alt+lwin+shift+w']
+  - commands: ['move --workspace x', 'focus --workspace x']
+    bindings: ['alt+lwin+shift+x']
+  - commands: ['move --workspace y', 'focus --workspace y']
+    bindings: ['alt+lwin+shift+y']
+  - commands: ['move --workspace z', 'focus --workspace z']
+    bindings: ['alt+lwin+shift+z']
