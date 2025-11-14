@@ -218,24 +218,35 @@ keybindings:
   - commands: ['focus --direction down']
     bindings: ['alt+lwin+j']
 
-  - commands: ['swap-workspace --workspace-in-direction left']
-    bindings: ['alt+lwin+left']
-  - commands: ['swap-workspace --workspace-in-direction right']
-    bindings: ['alt+lwin+right', alt+lwin+tab]
-  - commands: ['swap-workspace --workspace-in-direction up']
-    bindings: ['alt+lwin+up']
-  - commands: ['swap-workspace --workspace-in-direction down']
-    bindings: ['alt+lwin+down']
+  # Im-shambo controls
+  # - commands: ['swap-workspace --workspace-in-direction left']
+  #   bindings: ['alt+lwin+left, alt+lwin+shfit+tab']
+  # - commands: ['swap-workspace --workspace-in-direction right']
+  #   bindings: ['alt+lwin+right', alt+lwin+tab]
+  # - commands: ['swap-workspace --workspace-in-direction up']
+  #   bindings: ['alt+lwin+up']
+  # - commands: ['swap-workspace --workspace-in-direction down']
+  #   bindings: ['alt+lwin+down']
+
+  # Move focused workspace in a given direction.
+  - commands: ['move-workspace --direction left']
+    bindings: ['alt+lwin+shift+left']
+  - commands: ['move-workspace --direction right']
+    bindings: ['alt+lwin+shift+right']
+  - commands: ['move-workspace --direction up']
+    bindings: ['alt+lwin+shift+up']
+  - commands: ['move-workspace --direction down']
+    bindings: ['alt+lwin+shift+down']
 
   # Move focused window in a given direction.
   - commands: ['move --direction left']
-    bindings: ['alt+lwin+shift+h', 'alt+lwin+shift+left']
+    bindings: ['alt+lwin+shift+h']
   - commands: ['move --direction right']
-    bindings: ['alt+lwin+shift+l', 'alt+lwin+shift+right']
+    bindings: ['alt+lwin+shift+l']
   - commands: ['move --direction up']
-    bindings: ['alt+lwin+shift+k', 'alt+lwin+shift+up']
+    bindings: ['alt+lwin+shift+k']
   - commands: ['move --direction down']
-    bindings: ['alt+lwin+shift+j', 'alt+lwin+shift+down']
+    bindings: ['alt+lwin+shift+j']
   #
   # Resize focused window by a percentage or pixel amount.
   # - commands: ['resize --width -1%']
