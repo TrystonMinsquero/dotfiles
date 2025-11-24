@@ -72,6 +72,65 @@ wezterm.global_key_assignments = {
 	[{ modifiers = "CTRL|SHIFT", key = "N" }] = act.DisableDefaultAssignment,
 }
 
+local tmux_super = { key = "s", mods = "CTRL" }
+local tmux_act = function(key)
+	-- return act.Multiple({
+	-- 	act.SendKey(tmux_super),
+	-- 	act.SendKey({ key = key }),
+	-- })
+	return wezterm.action_callback(function(win, pane)
+		win:perform_action(act.SendKey(tmux_super), pane)
+		wezterm.sleep_ms(100)
+		win:perform_action(act.SendKey({ key = key }), pane)
+	end)
+end
+local tmux_key = function(key, destKey)
+	if destKey == nil then
+		destKey = key
+	end
+	return { key = key, mods = "CTRL|ALT", action = tmux_act(destKey) }
+end
+
+local tmux_keys = {
+	tmux_key("0"),
+	tmux_key("1"),
+	tmux_key("2"),
+	tmux_key("3"),
+	tmux_key("4"),
+	tmux_key("5"),
+	tmux_key("6"),
+	tmux_key("7"),
+	tmux_key("8"),
+	tmux_key("9"),
+
+	tmux_key("LeftArrow"),
+	tmux_key("DownArrow"),
+	tmux_key("UpArrow"),
+	tmux_key("RightArrow"),
+
+	tmux_key("h", "LeftArrow"),
+	tmux_key("j", "DownArrow"),
+	tmux_key("k", "UpArrow"),
+	tmux_key("l", "RightArrow"),
+
+	tmux_key("%"),
+	tmux_key("v", "%"), -- vert split
+	tmux_key('"'),
+	tmux_key("s", "%"),
+
+	tmux_key("$"), -- rename session
+	-- tmux_key("n", "$"), -- rename session
+	tmux_key(","), -- rename window
+
+	tmux_key("p"),
+	tmux_key("n"),
+	tmux_key("i", "n"),
+	tmux_key("o", "p"),
+	tmux_key("x"), -- kill pane
+
+	tmux_key("d"), -- detach
+}
+
 config.keys = { -- Navigate Splits
 	{
 		key = "h",
@@ -115,27 +174,28 @@ config.keys = { -- Navigate Splits
 		action = act.AdjustPaneSize({ "Right", 5 }),
 	},
 	-- Pane Management
-	{
-		key = "d",
-		mods = "CTRL|ALT",
-		action = act.SplitPane({
-			direction = "Right",
-			size = { Percent = 50 },
-		}),
-	},
-	{
-		key = "t",
-		mods = "CTRL|ALT",
-		action = act.SplitPane({
-			direction = "Right",
-			size = { Percent = 50 },
-		}),
-	},
-	{
-		key = "w",
-		mods = "CTRL|ALT",
-		action = act.CloseCurrentPane({ confirm = true }),
-	},
+	-- Commented out in replacement of tmux
+	-- {
+	-- 	key = "d",
+	-- 	mods = "CTRL|ALT",
+	-- 	action = act.SplitPane({
+	-- 		direction = "Right",
+	-- 		size = { Percent = 50 },
+	-- 	}),
+	-- },
+	-- {
+	-- 	key = "t",
+	-- 	mods = "CTRL|ALT",
+	-- 	action = act.SplitPane({
+	-- 		direction = "Right",
+	-- 		size = { Percent = 50 },
+	-- 	}),
+	-- },
+	-- {
+	-- 	key = "w",
+	-- 	mods = "CTRL|ALT",
+	-- 	action = act.CloseCurrentPane({ confirm = true }),
+	-- },
 	-- Tab Management
 	{
 		key = "N",
@@ -161,7 +221,7 @@ config.keys = { -- Navigate Splits
 	{ key = "PageDown", mods = "SHIFT", action = act.ScrollByPage(1.0) },
 	{
 		key = "s",
-		mods = "CTRL|ALT",
+		mods = "SHIFT|CTRL|ALT",
 		action = wezterm.action_callback(function(window, _)
 			local overrides = window:get_config_overrides() or {}
 			overrides.scroll_to_bottom_on_input = not overrides.scroll_to_bottom_on_input
@@ -177,7 +237,7 @@ config.keys = { -- Navigate Splits
 	{ key = "L", mods = "CTRL", action = act.ShowDebugOverlay },
 	{
 		key = "o",
-		mods = "CTRL|ALT",
+		mods = "SHIFT|CTRL|ALT",
 		-- toggling opacity
 		action = wezterm.action_callback(function(window, _)
 			local overrides = window:get_config_overrides() or {}
@@ -195,6 +255,10 @@ config.keys = { -- Navigate Splits
 		action = wezterm.action.SendKey({ key = "w", mods = "CTRL" }),
 	},
 }
+
+for i = 1, #config.keys do
+	table.insert(config.keys, tmux_keys[i])
+end
 
 -- For example, changing the color scheme:
 config.color_scheme = "Cloud (terminal.sexy)"
