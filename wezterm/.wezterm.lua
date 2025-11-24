@@ -170,6 +170,8 @@ config.keys = { -- Navigate Splits
 	},
 	-- Copy Mode
 	{ key = "y", mods = "CTRL|ALT", action = act.ActivateCopyMode },
+	-- Find
+	{ key = "/", mods = "CTRL|ALT", action = act.Search("CurrentSelectionOrEmptyString") },
 	-- Idk This was here
 	{ key = "9", mods = "CTRL", action = act.PaneSelect },
 	{ key = "L", mods = "CTRL", action = act.ShowDebugOverlay },
