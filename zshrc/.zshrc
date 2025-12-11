@@ -20,6 +20,10 @@ plugins=(
     # zsh-autosuggestions
 )
 
+if [ -f ~/.zshrc_plugs ]; then
+	source ~/.zshrc_plugs
+fi
+
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
@@ -37,6 +41,7 @@ alias pbcopy="xlip -selection current"
 alias py="python3"
 alias lg="lazygit"
 alias dot="cd ~/dotfiles"
+alias dev="cd ~/dev"
 
 export EDITOR="nvim"
 
@@ -47,12 +52,17 @@ alias zshex="nvim ~/.zshrc_extra"
 alias zshreload="source ~/.zshrc"
 alias nvimconf="nvim ~/.config/nvim/init.lua"
 alias ghosttyconf="nvim ~/.config/ghostty/config"
-alias installconf="nvim ~/dotfiles/install.sh"
+alias wezconf="nvim ~/.wezterm.lua"
 
 export PATH="/snap/bin/:$PATH"
 export PATH="$HOME/go/bin/:$PATH"
 
 export XDG_CONFIG_HOME="$HOME/.config"
+
+function grt()
+{
+    git rev-parse --show-toplevel
+}
 
 if [ -f ~/.fzf.zsh ]; then 
 	# Use install version of fzf if it exists
