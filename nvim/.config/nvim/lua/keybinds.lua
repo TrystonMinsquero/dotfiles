@@ -3,6 +3,30 @@ vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 -- Diagnostic keymaps
 -- vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
 vim.keymap.set("n", "<leader>q", vim.diagnostic.setqflist, { desc = "Open diagnostic [Q]uickfix list" })
+
+local function is_quickfix_open()
+	local windows = vim.fn.getwininfo()
+	for _, win in pairs(windows) do
+		if win["quickfix"] == 1 then
+			return true
+		end
+	end
+	return false
+end
+
+local function toggle_quickfix()
+	local quickfix_open = is_quickfix_open()
+	if quickfix_open then
+		vim.cmd.cclose()
+	else
+		vim.cmd.copen()
+	end
+end
+
+vim.keymap.set("n", "<Leader>tq", toggle_quickfix, { desc = "[T]oggle [Q]uickfix Window" })
+
+vim.keymap.set("n", "C-q", vim.diagnostic.setqflist, { desc = "Open diagnostic [Q]uickfix list" })
+
 vim.keymap.set("n", "<leader>o", vim.diagnostic.open_float, { desc = "[O]pen floating diagnostic" })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
