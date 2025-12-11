@@ -53,7 +53,8 @@ vim.keymap.set("n", "<leader>vi", ":e ~/.config/nvim/init.lua<CR>", { desc = "Ed
 vim.keymap.set("n", "<leader>vk", ":e ~/.config/nvim/lua/keybinds.lua<CR>", { desc = "Edit [Vim] [K]eybinds config" })
 vim.keymap.set("n", "<leader>vc", ":e ~/.config/nvim/lua/console.lua<CR>", { desc = "Edit [Vim] [C]onsole config" })
 vim.keymap.set("n", "<leader>vo", ":e ~/.config/nvim/lua/options.lua<CR>", { desc = "Edit [Vim] [O]ptions config" })
-vim.keymap.set("n", "<leader>vp", ":e ~/.config/nvim/lua/plugins<CR>", { desc = "Edit [Vim] [O]ptions config" })
+vim.keymap.set("n", "<leader>vp", ":e ~/.config/nvim/lua/plugins<CR>", { desc = "Edit [Vim] [P]lugins" })
+vim.keymap.set("n", "<leader>vl", ":e ~/.config/nvim/lua/plugins/lsp.lua<CR>", { desc = "Edit [Vim] [L]sp config" })
 
 vim.keymap.set({ "n", "i", "v" }, "<C-p>", "<C-r>*", { desc = "Paste Default Register" })
 
