@@ -1,9 +1,6 @@
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
 -- Diagnostic keymaps
--- vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
-vim.keymap.set("n", "<leader>q", vim.diagnostic.setqflist, { desc = "Open diagnostic [Q]uickfix list" })
-
 local function is_quickfix_open()
 	local windows = vim.fn.getwininfo()
 	for _, win in pairs(windows) do
@@ -14,16 +11,24 @@ local function is_quickfix_open()
 	return false
 end
 
+local old_qf_list = {}
 local function toggle_quickfix()
-	local quickfix_open = is_quickfix_open()
-	if quickfix_open then
-		vim.cmd.cclose()
-	else
-		vim.cmd.copen()
+	local curr = vim.api.nvim_get_current_win()
+	local already_open = is_quickfix_open()
+	vim.diagnostic.setqflist()
+	local qf_list = vim.fn.getqflist()
+	if already_open then
+		if vim.deep_equal(old_qf_list, qf_list) then
+			vim.cmd.cclose()
+		end
 	end
+	if vim.api.nvim_get_current_win() ~= curr then
+		vim.api.nvim_set_current_win(curr)
+	end
+	old_qf_list = qf_list
 end
 
-vim.keymap.set("n", "<Leader>tq", toggle_quickfix, { desc = "[T]oggle [Q]uickfix Window" })
+vim.keymap.set("n", "<leader>q", toggle_quickfix, { desc = "Open diagnostic [Q]uickfix list" })
 
 vim.keymap.set("n", "C-q", vim.diagnostic.setqflist, { desc = "Open diagnostic [Q]uickfix list" })
 
