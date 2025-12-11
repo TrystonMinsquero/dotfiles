@@ -14,7 +14,6 @@ vim.g.have_nerd_font = false
 
 -- Make line numbers default
 vim.o.number = true
-vim.o.relativenumber = true -- TODO: Is this really good?
 
 vim.o.wrap = true
 vim.o.linebreak = true
