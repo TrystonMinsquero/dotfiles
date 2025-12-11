@@ -1,10 +1,7 @@
 #!/bin/bash
 
 # run with 
-# curl -fsSL https://raw.githubusercontent.com/TrystonMinsquero/dotfiles/main/install.sh) -o install.sh \
-# && vim install.sh \
-# && ./install.sh \
-# && rm install.sh
+# curl -fsSL https://raw.githubusercontent.com/TrystonMinsquero/dotfiles/main/install.sh -o install.sh && vim install.sh && sudo ./install.sh && rm install.sh
 
 # Delete this once you've read the entire script 
 echo "Read through this script so you know what you're installing!"
