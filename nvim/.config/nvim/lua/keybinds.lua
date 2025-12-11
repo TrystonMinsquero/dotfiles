@@ -52,6 +52,11 @@ vim.keymap.set({ "n", "i", "v" }, "<C-p>", "<C-r>*", { desc = "Paste Default Reg
 vim.keymap.set("n", "<M-k>", "<cmd>cprev<CR>", { desc = "Move to previous item in quick fix list" })
 vim.keymap.set("n", "<M-j>", "<cmd>cnext<CR>", { desc = "Move to next item in quick fix list" })
 
+vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move focus to the left window" })
+vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })
+vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
+vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
+
 -- Tabbing
 vim.keymap.set("v", "<leader>r", "<cmd>'<,'>retab!<CR>", { desc = "retab", silent = true })
 
