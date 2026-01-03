@@ -12,10 +12,12 @@ local function is_quickfix_open()
 end
 
 local old_qf_list = {}
-local function toggle_quickfix()
+
+---@param opts? vim.diagnostic.setqflist.Opts
+local function toggle_quickfix(opts)
 	local curr = vim.api.nvim_get_current_win()
 	local already_open = is_quickfix_open()
-	vim.diagnostic.setqflist()
+	vim.diagnostic.setqflist(opts)
 	local qf_list = vim.fn.getqflist()
 	if already_open then
 		if vim.deep_equal(old_qf_list, qf_list) then
@@ -28,7 +30,18 @@ local function toggle_quickfix()
 	old_qf_list = qf_list
 end
 
-vim.keymap.set("n", "<leader>q", toggle_quickfix, { desc = "Open diagnostic [Q]uickfix list" })
+local function toggle_qf_default()
+	toggle_quickfix({})
+end
+
+local function toggle_qf_special()
+	toggle_quickfix({
+		severity = vim.diagnostic.severity.ERROR,
+	})
+end
+
+vim.keymap.set("n", "<leader>q", toggle_qf_default, { desc = "Open diagnostic [Q]uickfix list" })
+vim.keymap.set("n", "<leader>Q", toggle_qf_special, { desc = "Open diagnostic [Q]uickfix list special" })
 
 vim.keymap.set("n", "C-q", vim.diagnostic.setqflist, { desc = "Open diagnostic [Q]uickfix list" })
 
