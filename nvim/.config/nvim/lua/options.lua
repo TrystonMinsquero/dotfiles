@@ -60,3 +60,5 @@ vim.o.scrolloff = 8
 vim.o.confirm = true
 
 vim.o.shell = "/bin/zsh"
+
+vim.opt.termguicolors = true
