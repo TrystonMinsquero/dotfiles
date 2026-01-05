@@ -66,6 +66,10 @@ wezterm.on("toggle-colorscheme", function(window, pane)
 	window:set_config_overrides(overrides)
 end)
 
+wezterm.on('format-window-title', function (tab, pan, tabs, panes, config)
+	return "Wezterm"
+end)
+
 -- keymaps
 
 wezterm.global_key_assignments = {
