@@ -322,21 +322,6 @@ if wezterm.target_triple:find("windows") then
 end
 
 config.initial_cols = 80
--- config.window_background_image = "C:/dev/misc/berk.png"
--- config.window_background_image_hsb = {
--- 	brightness = 0.1,
--- }
-
--- wezterm.on("gui-startup", function(cmd)
--- 	local args = {}
--- 	if cmd then
--- 		args = cmd.args
--- 	end
---
--- 	local tab, pane, window = mux.spawn_window(cmd or {})
--- 	-- window:gui_window():maximize()
--- 	-- window:gui_window():set_position(0, 0)
--- end)
 
 -- and finally, return the configuration to wezterm
 return config
