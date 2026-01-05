@@ -34,6 +34,7 @@ local opacity = 0.75 -- Value is also used for toggling
 config.window_background_opacity = opacity
 config.prefer_egl = true
 config.font_size = 14.0
+config.audible_bell = "Disabled"
 
 config.window_padding = {
 	left = 0,
