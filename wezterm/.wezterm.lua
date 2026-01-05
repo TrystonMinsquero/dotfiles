@@ -128,8 +128,6 @@ local tmux_keys = {
 
 	tmux_key("p"),
 	tmux_key("n"),
-	tmux_key("i", "n"),
-	tmux_key("o", "p"),
 	tmux_key("x"), -- kill pane
 
 	tmux_key("d"), -- detach
@@ -241,7 +239,7 @@ config.keys = { -- Navigate Splits
 	{ key = "L", mods = "CTRL", action = act.ShowDebugOverlay },
 	{
 		key = "o",
-		mods = "SHIFT|CTRL|ALT",
+		mods = "CTRL|ALT",
 		-- toggling opacity
 		action = wezterm.action_callback(function(window, _)
 			local overrides = window:get_config_overrides() or {}
