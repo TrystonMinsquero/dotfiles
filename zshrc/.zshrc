@@ -54,6 +54,7 @@ alias nvimconf="nvim ~/.config/nvim/init.lua"
 alias ghosttyconf="nvim ~/.config/ghostty/config"
 alias wezconf="nvim ~/.wezterm.lua"
 alias tmuxconf="nvim ~/.tmux.conf"
+alias kanata="~/dotfiles/kanata/kanata -c ~/dotfiles/kanata/.kanata"
 
 export PATH="/snap/bin/:$PATH"
 export PATH="$HOME/go/bin/:$PATH"
