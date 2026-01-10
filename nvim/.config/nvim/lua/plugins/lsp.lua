@@ -59,14 +59,24 @@ return {
 
 					-- Fuzzy find all the symbols in your current document.
 					--  Symbols are things like variables, functions, types, etc.
-					map("<leader>lO", require("telescope.builtin").lsp_document_symbols, "Open Document Symbols")
+					--  Doing both to see which one I like more
+					map(
+						"<leader>sS",
+						require("telescope.builtin").lsp_document_symbols,
+						"[S]earch [S]ymbols in current buffer"
+					)
+					map(
+						"<leader>sb",
+						require("telescope.builtin").lsp_document_symbols,
+						"[S]earch symbols in current [B]uffer"
+					)
 
 					-- Fuzzy find all the symbols in your current workspace.
 					--  Similar to document symbols, except searches over your entire project.
 					map(
-						"<leader>lW",
+						"<leader>ss",
 						require("telescope.builtin").lsp_dynamic_workspace_symbols,
-						"Open Workspace Symbols"
+						"[S]earch [S]ymbols in workspace"
 					)
 
 					-- Jump to the type of the word under your cursor.
