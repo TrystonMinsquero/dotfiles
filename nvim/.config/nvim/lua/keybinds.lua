@@ -77,6 +77,11 @@ vim.keymap.set("n", "<C-j>", "<cmd>cnext<CR>", { desc = "Move to next item in qu
 -- vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
 -- vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
 
+vim.keymap.set("n", "<down>", ":m .+1<CR>==") -- move line up(n)
+vim.keymap.set("n", "<up>", ":m .-2<CR>==") -- move line down(n)
+vim.keymap.set("v", "<down>", ":m '>+1<CR>gv=gv")
+vim.keymap.set("v", "<up>", ":m '<-2<CR>gv=gv")
+
 -- Tabbing
 vim.keymap.set("v", "<leader>r", "<cmd>'<,'>retab!<CR>", { desc = "retab", silent = true })
 
