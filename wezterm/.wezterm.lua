@@ -56,17 +56,6 @@ config.use_fancy_tab_bar = true
 -- This is where you actually apply your config choices
 --
 
--- color scheme toggling
-wezterm.on("toggle-colorscheme", function(window, pane)
-	local overrides = window:get_config_overrides() or {}
-	if overrides.color_scheme == "Zenburn" then
-		overrides.color_scheme = "Cloud (terminal.sexy)"
-	else
-		overrides.color_scheme = "Zenburn"
-	end
-	window:set_config_overrides(overrides)
-end)
-
 wezterm.on('format-window-title', function (tab, pan, tabs, panes, config)
 	return "Wezterm"
 end)
@@ -264,7 +253,7 @@ for i = 1, #config.keys do
 end
 
 -- For example, changing the color scheme:
-config.color_scheme = "Cloud (terminal.sexy)"
+config.color_scheme = "Tokyo Night Moon"
 config.colors = {
 	background = "#181616", -- vague.nvim bg
 	-- background = "#080808", -- almost black
