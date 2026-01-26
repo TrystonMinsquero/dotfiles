@@ -16,9 +16,10 @@ config.cursor_blink_rate = 500
 config.term = "xterm-256color" -- Set the terminal type
 
 -- config.font = wezterm.font("Iosevka Custom")
+config.font = wezterm.font("Iosevka Term Medium")
 -- config.font = wezterm.font("Monocraft Nerd Font")
 -- config.font = wezterm.font("FiraCode Nerd Font Mono")
-config.font = wezterm.font("JetBrains Mono Regular")
+-- config.font = wezterm.font("JetBrains Mono Regular")
 config.cell_width = 0.9
 -- config.font = wezterm.font("Menlo Regular")
 -- config.font = wezterm.font("Hasklig")
