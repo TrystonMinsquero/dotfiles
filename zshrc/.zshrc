@@ -36,7 +36,20 @@ set -o vi
 # Set up fzf key bindings and fuzzy completion
 source <(fzf --zsh)
 
-alias pbcopy="xlip -selection current"
+uname_out=$(uname -a)
+case "${uname_out}" in
+    *Microsoft*|*microsoft*) OS="WSL";;
+    *Darwin*) OS="Mac";;
+    *) OS="UNKNOWN"
+esac
+
+if [[ $OS = "WSL" ]]; then
+    alias cb="clip.exe"
+elif [[ $OS == "Mac" ]]; then
+    alias cb="pbcopy"
+else
+    alias pbcopy="xlip -selection current"
+fi
 
 alias py="python3"
 alias lg="lazygit"
