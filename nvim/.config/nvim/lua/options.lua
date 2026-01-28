@@ -14,6 +14,7 @@ vim.g.have_nerd_font = false
 
 -- Make line numbers default
 vim.o.number = true
+vim.o.relativenumber = true -- can toggle via hotkey when sharing screen
 
 vim.o.wrap = true
 vim.o.linebreak = true
