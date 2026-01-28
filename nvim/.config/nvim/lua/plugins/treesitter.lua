@@ -37,6 +37,18 @@ return {
 		--    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
 	},
 	{
+		"nvim-treesitter/nvim-treesitter-context",
+		dependencies = {
+			{ "nvim-treesitter/nvim-treesitter", lazy = true },
+		},
+		config = function()
+			require("treesitter-context").setup({
+				enable = false,
+			})
+			vim.keymap.set("n", "<leader>tc", "<cmd>TSContext toggle<CR>", { desc = "[T]oggle Treesitter [C]ontext"})
+		end,
+	},
+	{
 		"nvim-treesitter/nvim-treesitter-textobjects",
 		dependencies = {
 			{ "nvim-treesitter/nvim-treesitter", lazy = true },
