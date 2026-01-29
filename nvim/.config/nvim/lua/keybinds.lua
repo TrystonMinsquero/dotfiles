@@ -73,6 +73,8 @@ vim.keymap.set({ "n", "i", "v" }, "<C-p>", "<C-r>*", { desc = "Paste Default Reg
 vim.keymap.set("n", "<C-k>", "<cmd>cprev<CR>", { desc = "Move to previous item in quick fix list" })
 vim.keymap.set("n", "<C-j>", "<cmd>cnext<CR>", { desc = "Move to next item in quick fix list" })
 
+vim.keymap.set("n", "<C-w><C-q>", "<C-w>q") -- prevents accidental <C-q>
+
 -- Start trying to use C-w C-w instead.
 -- vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move focus to the left window" })
 -- vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })
