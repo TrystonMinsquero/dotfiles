@@ -38,18 +38,19 @@ source <(fzf --zsh)
 
 uname_out=$(uname -a)
 case "${uname_out}" in
-    *Microsoft*|*microsoft*) OS="WSL";;
-    *Darwin*) OS="Mac";;
-    *) OS="UNKNOWN"
+    *Microsoft*|*microsoft*) 
+        OS="WSL"
+        alias cb="clip.exe"
+        ;;
+    *Darwin*) 
+        OS="Mac"
+        alias cb="pbcopy"
+        ;;
+    *) 
+        OS="Linux"
+        alias cb="xlip -selection current"
+        ;;
 esac
-
-if [[ $OS = "WSL" ]]; then
-    alias cb="clip.exe"
-elif [[ $OS == "Mac" ]]; then
-    alias cb="pbcopy"
-else
-    alias pbcopy="xlip -selection current"
-fi
 
 alias py="python3"
 alias lg="lazygit"
