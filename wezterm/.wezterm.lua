@@ -34,7 +34,7 @@ config.cell_width = 0.9
 local opacity = 0.75 -- Value is also used for toggling
 config.window_background_opacity = opacity
 config.prefer_egl = true
-config.font_size = 14.0
+config.font_size = 16.0
 config.audible_bell = "Disabled"
 
 config.window_padding = {
