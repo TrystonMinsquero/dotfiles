@@ -47,7 +47,9 @@ vim.keymap.set("n", "C-q", vim.diagnostic.setqflist, { desc = "Open diagnostic [
 
 vim.keymap.set("n", "<leader>o", vim.diagnostic.open_float, { desc = "[O]pen floating diagnostic" })
 
-vim.keymap.set("n", "<leader>trl", function () vim.o.relativenumber = not vim.o.relativenumber end, { desc = "[T]oggle [R]elative [L]ine numbers"})
+vim.keymap.set("n", "<leader>trl", function()
+	vim.o.relativenumber = not vim.o.relativenumber
+end, { desc = "[T]oggle [R]elative [L]ine numbers" })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
