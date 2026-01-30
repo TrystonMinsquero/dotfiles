@@ -47,9 +47,15 @@ vim.keymap.set("n", "C-q", vim.diagnostic.setqflist, { desc = "Open diagnostic [
 
 vim.keymap.set("n", "<leader>o", vim.diagnostic.open_float, { desc = "[O]pen floating diagnostic" })
 
-vim.keymap.set("n", "<leader>trl", function()
+local toggle_rel_line_nums = function()
 	vim.o.relativenumber = not vim.o.relativenumber
-end, { desc = "[T]oggle [R]elative [L]ine numbers" })
+end
+vim.keymap.set("n", "<leader>tl", toggle_rel_line_nums, { desc = "[T]oggle Relative [L]ine numbers" })
+
+-- NOTE: Think about using a plugin like https://github.com/tadmccorkle/markdown.nvim
+local toggle_checkbox = require("toggle-checkbox").toggle
+vim.keymap.set("n", "<leader><CR>", toggle_checkbox, { desc = "[T]oggle Checkbox" })
+vim.keymap.set("n", "<leader>x", toggle_checkbox, { desc = "[T]oggle Checkbo[x]" })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
