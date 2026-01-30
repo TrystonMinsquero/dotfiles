@@ -34,6 +34,11 @@ vim.o.breakindent = true
 vim.o.undofile = true
 vim.o.swapfile = false
 
+-- Folds
+vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+vim.o.foldmethod = "expr"
+vim.o.foldlevelstart = 99
+
 -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
 vim.o.ignorecase = true
 vim.o.smartcase = true
