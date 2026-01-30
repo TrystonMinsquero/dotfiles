@@ -3,9 +3,7 @@ TODAY=${TODAY:=$(date +%Y-%m-%d)}
 TODO_DIR=${TODO_DIR:="$HOME/notes/todo"}
 
 function today_todo() {
-  local yesterday=$(date -d "yesterday" +%Y-%m-%d)
   local todo_file="$TODO_DIR/$TODAY.md"
-  local yesterday_file="$TODO_DIR/$yesterday.md"
 
   # Create directory if it doesn't exist
   mkdir -p "$TODO_DIR"
@@ -15,9 +13,10 @@ function today_todo() {
     local formatted_date=$(date +%m/%d/%Y)
     echo -e "# $formatted_date\n\n" > "$todo_file"
 
-    # Append previous day's content if it exists
-    if [ -f "$yesterday_file" ]; then
-      tail -n +3 "$yesterday_file" >> "$todo_file"
+    # Find most recent previous todo file and append its content
+    local prev_file=$(ls -1 "$TODO_DIR"/*.md 2>/dev/null | sort -r | head -n 1)
+    if [ -n "$prev_file" ] && [ "$prev_file" != "$todo_file" ]; then
+      tail -n +3 "$prev_file" >> "$todo_file"
     fi
   fi
   echo $todo_file
