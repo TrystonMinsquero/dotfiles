@@ -60,7 +60,9 @@ alias dev="cd ~/dev"
 export EDITOR="nvim"
 
 # App Shortcuts
-alias todo="nvim ~/.todo.md"
+alias not="nvim ~/notes"
+alias note="nvim ~/notes"
+alias notes="nvim ~/notes"
 alias zshconf="nvim ~/.zshrc"
 alias zshex="nvim ~/.zshrc_extra"
 alias zshreload="source ~/.zshrc"
