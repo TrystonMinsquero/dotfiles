@@ -94,7 +94,15 @@ vim.keymap.set("n", "<up>", ":m .-2<CR>==") -- move line down(n)
 vim.keymap.set("v", "<down>", ":m '>+1<CR>gv=gv")
 vim.keymap.set("v", "<up>", ":m '<-2<CR>gv=gv")
 
-vim.keymap.set("n", "<leader>d", "<cmd>e todo.md<CR>", { desc = "Open to[d]o", silent = true })
+vim.keymap.set("n", "<leader>d", function()
+	local out = vim.fn.system("source $HOME/.scripts/todo.sh && today_todo")
+	vim.cmd("edit " .. out)
+end, { desc = "Open to[d]o", silent = true })
+
+vim.keymap.set("n", "<leader>j", function()
+	local out = vim.fn.system("source $HOME/.scripts/journal.sh && today_journal")
+	vim.cmd("edit " .. out)
+end, { desc = "Open [J]ournal", silent = true })
 
 -- Tabbing
 vim.keymap.set("v", "<leader>r", "<cmd>'<,'>retab!<CR>", { desc = "retab", silent = true })
