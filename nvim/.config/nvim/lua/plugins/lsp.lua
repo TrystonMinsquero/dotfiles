@@ -37,6 +37,7 @@ return {
 					map("<leader>lh", vim.lsp.buf.hover, "Show [h]over")
 					map("K", vim.lsp.buf.hover, "Show [h]over")
 					map("<leader>ls", "<cmd>LspClangdSwitchSourceHeader<CR>", "[S]witch Source Header")
+					map("<C-h>", "<cmd>LspClangdSwitchSourceHeader<CR>", "Switch Source [H]eader")
 
 					-- Find references for the word under your cursor.
 					map("<leader>lr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
