@@ -93,6 +93,32 @@ if [ -f "$HOME/.zshrc_extra" ]; then
     source "$HOME/.zshrc_extra"
 fi
 
+# Todo alias
+function t() {
+  local today=$(date +%Y-%m-%d)
+  local yesterday=$(date -d "yesterday" +%Y-%m-%d)
+  local todo_dir="$HOME/notes/todo"
+  local todo_file="$todo_dir/$today.md"
+  local yesterday_file="$todo_dir/$yesterday.md"
+
+  # Create directory if it doesn't exist
+  mkdir -p "$todo_dir"
+
+  # If file doesn't exist, create it with header
+  if [ ! -f "$todo_file" ]; then
+    local formatted_date=$(date +%m/%d/%Y)
+    echo -e "# $formatted_date\n\n" > "$todo_file"
+
+    # Append previous day's content if it exists
+    if [ -f "$yesterday_file" ]; then
+      tail -n +3 "$yesterday_file" >> "$todo_file"
+    fi
+    ${EDITOR:-vim} +3 -c 'startinsert' "$todo_file"
+  else
+    ${EDITOR:-vim} +3 "$todo_file"
+  fi
+}
+
 # Journal alias
 function j() {
   local date=$(date +%Y-%m-%d)
