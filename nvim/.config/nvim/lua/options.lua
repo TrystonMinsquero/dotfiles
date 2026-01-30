@@ -63,3 +63,13 @@ vim.o.confirm = true
 vim.o.shell = "/bin/zsh"
 
 vim.opt.termguicolors = true
+
+vim.api.nvim_create_autocmd("BufEnter", {
+	desc = "Set options to enable hard word wrapping",
+	group = vim.api.nvim_create_augroup("Hard word wrapping", { clear = true }),
+	pattern = "*.md",
+	callback = function()
+		vim.opt_local.textwidth = 100
+		vim.opt_local.formatoptions = "tcqnla"
+	end,
+})
