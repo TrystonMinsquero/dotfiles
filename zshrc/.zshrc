@@ -92,3 +92,22 @@ fi
 if [ -f "$HOME/.zshrc_extra" ]; then
     source "$HOME/.zshrc_extra"
 fi
+
+# Journal alias
+function j() {
+  local date=$(date +%Y-%m-%d)
+  local journal_dir="$HOME/notes/journal"
+  local journal_file="$journal_dir/$date.md"
+
+  # Create directory if it doesn't exist
+  mkdir -p "$journal_dir"
+
+  # If file doesn't exist, create it with header
+  if [ ! -f "$journal_file" ]; then
+      local date=$(date +%m/%d/%Y)
+      echo -e "# $date\n\n" > "$journal_file"
+  fi
+
+  # Open in editor (uses $EDITOR or defaults to vim)
+  ${EDITOR:-vim} +3 -c 'startinsert' "$journal_file"
+}
