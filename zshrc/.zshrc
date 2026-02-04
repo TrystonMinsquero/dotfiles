@@ -98,3 +98,5 @@ fi
 
 source $HOME/.scripts/journal.sh
 source $HOME/.scripts/todo.sh
+
+alias j="journal_today"
