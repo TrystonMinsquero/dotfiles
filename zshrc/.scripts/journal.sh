@@ -1,9 +1,8 @@
 
-TODAY=${TODAY:=$(date +%Y-%m-%d)}
-JOURNAL_DIR=${JOURNAL_DIR:="$HOME/notes/journal"}
-
 # Create today's journal if it doesn't exist
-function today_journal() {
+function journal_today() {
+  TODAY=$(date +%Y-%m-%d)
+  JOURNAL_DIR="$HOME/notes/journal"
   local journal_file="$JOURNAL_DIR/$TODAY.md"
 
   # Create directory if it doesn't exist
@@ -14,11 +13,5 @@ function today_journal() {
       local date=$(date +%m/%d/%Y)
       echo -e "# $date\n\n" > "$journal_file"
   fi
-  echo $journal_file
-}
-
-# Edit today's journal 
-function j() {
-  # Open in editor (uses $EDITOR or defaults to vim)
-  ${EDITOR:-vim} +3 -c 'startinsert' "$(today_journal)"
+  ${EDITOR:-vim} +3 -c 'startinsert' "$journal_file"
 }
