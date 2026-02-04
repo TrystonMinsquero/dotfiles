@@ -32,6 +32,7 @@ config.cell_width = 0.9
 -- config.cell_width = 0.9
 
 local opacity = 0.75 -- Value is also used for toggling
+local opacity_inc = 0.05 -- increment
 config.window_background_opacity = opacity
 config.prefer_egl = true
 config.font_size = 16.0
@@ -57,7 +58,7 @@ config.use_fancy_tab_bar = true
 -- This is where you actually apply your config choices
 --
 
-wezterm.on('format-window-title', function (tab, pan, tabs, panes, config)
+wezterm.on("format-window-title", function(tab, pan, tabs, panes, config)
 	return "Wezterm"
 end)
 
@@ -239,6 +240,28 @@ config.keys = { -- Navigate Splits
 			else
 				overrides.window_background_opacity = 1.0
 			end
+			window:set_config_overrides(overrides)
+		end),
+	},
+	{
+		key = "o",
+		mods = "CTRL|ALT|SHIFT",
+		-- toggling opacity
+		action = wezterm.action_callback(function(window, _)
+			local overrides = window:get_config_overrides() or {}
+			local o = math.max(0, overrides.window_background_opacity - opacity_inc)
+			overrides.window_background_opacity = o
+			window:set_config_overrides(overrides)
+		end),
+	},
+	{
+		key = "i",
+		mods = "CTRL|ALT|SHIFT",
+		-- toggling opacity
+		action = wezterm.action_callback(function(window, _)
+			local overrides = window:get_config_overrides() or {}
+			local o = math.min(1, overrides.window_background_opacity + opacity_inc)
+			overrides.window_background_opacity = o
 			window:set_config_overrides(overrides)
 		end),
 	},
