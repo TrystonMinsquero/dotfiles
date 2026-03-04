@@ -17,19 +17,8 @@ config.term = "xterm-256color" -- Set the terminal type
 
 -- config.font = wezterm.font("Iosevka Custom")
 config.font = wezterm.font("Iosevka Term Medium")
--- config.font = wezterm.font("Monocraft Nerd Font")
--- config.font = wezterm.font("FiraCode Nerd Font Mono")
 -- config.font = wezterm.font("JetBrains Mono Regular")
 config.cell_width = 0.9
--- config.font = wezterm.font("Menlo Regular")
--- config.font = wezterm.font("Hasklig")
--- config.font = wezterm.font("Monoid Retina")
--- config.font = wezterm.font("InputMonoNarrow")
--- config.font = wezterm.font("mononoki Regular")
--- config.font = wezterm.font("Iosevka")
--- config.font = wezterm.font("M+ 1m")
--- config.font = wezterm.font("Hack Regular")
--- config.cell_width = 0.9
 
 local opacity = 0.75 -- Value is also used for toggling
 local opacity_inc = 0.05 -- increment
@@ -58,6 +47,9 @@ config.use_fancy_tab_bar = true
 -- This is where you actually apply your config choices
 --
 
+local CURSOR_MOD = wezterm.target_triple:find("apple") and "ALT" or "CTRL"
+
+-- Makes it convenient for window managers
 wezterm.on("format-window-title", function(tab, pan, tabs, panes, config)
 	return "Wezterm"
 end)
@@ -68,62 +60,14 @@ wezterm.global_key_assignments = {
 	[{ modifiers = "CTRL|SHIFT", key = "N" }] = act.DisableDefaultAssignment,
 }
 
-local tmux_super = { key = "s", mods = "CTRL" }
-local tmux_act = function(key)
-	-- return act.Multiple({
-	-- 	act.SendKey(tmux_super),
-	-- 	act.SendKey({ key = key }),
-	-- })
-	return wezterm.action_callback(function(win, pane)
-		win:perform_action(act.SendKey(tmux_super), pane)
-		wezterm.sleep_ms(100)
-		win:perform_action(act.SendKey({ key = key }), pane)
-	end)
-end
-local tmux_key = function(key, destKey)
-	if destKey == nil then
-		destKey = key
+local function find_other_pane(pane)
+	for _, other_pane in ipairs(pane:tab():panes()) do
+		if other_pane:pane_id() ~= pane:pane_id() then
+			return other_pane
+		end
 	end
-	return { key = key, mods = "CTRL|ALT", action = tmux_act(destKey) }
+	return nil
 end
-
-local tmux_keys = {
-	tmux_key("0"),
-	tmux_key("1"),
-	tmux_key("2"),
-	tmux_key("3"),
-	tmux_key("4"),
-	tmux_key("5"),
-	tmux_key("6"),
-	tmux_key("7"),
-	tmux_key("8"),
-	tmux_key("9"),
-
-	tmux_key("LeftArrow"),
-	tmux_key("DownArrow"),
-	tmux_key("UpArrow"),
-	tmux_key("RightArrow"),
-
-	tmux_key("h", "LeftArrow"),
-	tmux_key("j", "DownArrow"),
-	tmux_key("k", "UpArrow"),
-	tmux_key("l", "RightArrow"),
-
-	tmux_key("%"),
-	tmux_key("v", "%"), -- vert split
-	tmux_key('"'),
-	tmux_key("s", "%"),
-
-	tmux_key("$"), -- rename session
-	-- tmux_key("n", "$"), -- rename session
-	tmux_key(","), -- rename window
-
-	tmux_key("p"),
-	tmux_key("n"),
-	tmux_key("x"), -- kill pane
-
-	tmux_key("d"), -- detach
-}
 
 config.keys = { -- Navigate Splits
 	{
@@ -167,43 +111,116 @@ config.keys = { -- Navigate Splits
 		mods = "CTRL|ALT|SHIFT",
 		action = act.AdjustPaneSize({ "Right", 5 }),
 	},
+	-- Workspace Management
+	{
+		key = "s",
+		mods = "CTRL|ALT",
+		action = act.ShowLauncherArgs({
+			flags = "FUZZY|WORKSPACES",
+		}),
+	},
+	{
+		key = "c",
+		mods = "CTRL|ALT",
+		action = act.PromptInputLine({
+			description = wezterm.format({
+				{ Attribute = { Intensity = "Bold" } },
+				{ Foreground = { AnsiColor = "Fuchsia" } },
+				{ Text = "Enter name for new workspace" },
+			}),
+			action = wezterm.action_callback(function(window, pane, line)
+				-- line will be `nil` if they hit escape without entering anything
+				-- An empty string if they just hit enter
+				-- Or the actual line of text they wrote
+				if line then
+					window:perform_action(
+						act.SwitchToWorkspace({
+							name = line,
+						}),
+						pane
+					)
+				end
+			end),
+		}),
+	},
 	-- Pane Management
-	-- Commented out in replacement of tmux
-	-- {
-	-- 	key = "d",
-	-- 	mods = "CTRL|ALT",
-	-- 	action = act.SplitPane({
-	-- 		direction = "Right",
-	-- 		size = { Percent = 50 },
-	-- 	}),
-	-- },
-	-- {
-	-- 	key = "t",
-	-- 	mods = "CTRL|ALT",
-	-- 	action = act.SplitPane({
-	-- 		direction = "Right",
-	-- 		size = { Percent = 50 },
-	-- 	}),
-	-- },
-	-- {
-	-- 	key = "w",
-	-- 	mods = "CTRL|ALT",
-	-- 	action = act.CloseCurrentPane({ confirm = true }),
-	-- },
+	{
+		key = "|",
+		mods = "CTRL|ALT",
+		action = act.SplitPane({
+			direction = "Right",
+			size = { Percent = 50 },
+		}),
+	},
+	{
+		key = "v",
+		mods = "CTRL|ALT",
+		action = act.SplitPane({
+			direction = "Right",
+			size = { Percent = 50 },
+		}),
+	},
+	{
+		key = "%",
+		mods = "CTRL|ALT",
+		action = act.SplitPane({
+			direction = "Right",
+			size = { Percent = 50 },
+		}),
+	},
+	{
+		key = "w",
+		mods = "CTRL|ALT",
+		action = act.CloseCurrentPane({ confirm = true }),
+	},
 	-- Tab Management
 	{
 		key = "N",
-		mods = "CTRL|SHIFT",
+		mods = "CTRL|ALT",
 		action = act.DisableDefaultAssignment,
 	},
 	{
 		key = "t",
-		mods = "CTRL",
+		mods = "CTRL|ALT",
 		action = act.SpawnTab("CurrentPaneDomain"),
+	},
+	{ key = "0", mods = "CTRL|ALT", action = act.ActivateTab(-1) },
+	{ key = "1", mods = "CTRL|ALT", action = act.ActivateTab(0) },
+	{ key = "2", mods = "CTRL|ALT", action = act.ActivateTab(1) },
+	{ key = "3", mods = "CTRL|ALT", action = act.ActivateTab(2) },
+	{ key = "4", mods = "CTRL|ALT", action = act.ActivateTab(3) },
+	{ key = "5", mods = "CTRL|ALT", action = act.ActivateTab(4) },
+	{ key = "6", mods = "CTRL|ALT", action = act.ActivateTab(5) },
+	{ key = "7", mods = "CTRL|ALT", action = act.ActivateTab(6) },
+	{ key = "8", mods = "CTRL|ALT", action = act.ActivateTab(7) },
+	{ key = "9", mods = "CTRL|ALT", action = act.ActivateTab(8) },
+	{
+		key = "p",
+		mods = "CTRL|ALT",
+		action = act.ActivateCommandPalette,
+	},
+	{ -- Rename Current Tab
+		key = ",",
+		mods = "CTRL|ALT",
+		action = act.PromptInputLine({
+			description = wezterm.format({
+				{ Attribute = { Intensity = "Bold" } },
+				{ Foreground = { AnsiColor = "Fuchsia" } },
+				{ Text = "Enter name for the current tab" },
+			}),
+			action = wezterm.action_callback(function(window, _, line)
+				-- line will be `nil` if they hit escape without entering anything
+				-- An empty string if they just hit enter
+				-- Or the actual line of text they wrote
+				if line then
+					window:active_tab():set_title(line)
+				end
+			end),
+		}),
 	},
 	{
 		key = "q",
-		mods = "CTRL|ALT",
+		mods = "CTRL|ALT|SHIFT",
 		action = act.QuitApplication,
 	},
 	-- Scroll
@@ -226,9 +243,6 @@ config.keys = { -- Navigate Splits
 	{ key = "y", mods = "CTRL|ALT", action = act.ActivateCopyMode },
 	-- Find
 	{ key = "/", mods = "CTRL|ALT", action = act.Search("CurrentSelectionOrEmptyString") },
-	-- Idk This was here
-	{ key = "9", mods = "CTRL", action = act.PaneSelect },
-	{ key = "L", mods = "CTRL", action = act.ShowDebugOverlay },
 	{
 		key = "o",
 		mods = "CTRL|ALT",
@@ -265,16 +279,50 @@ config.keys = { -- Navigate Splits
 			window:set_config_overrides(overrides)
 		end),
 	},
+	-- Sane rebindings
 	{
 		key = "Backspace",
-		mods = wezterm.target_triple:find("apple") and "ALT" or "CTRL",
+		mods = CURSOR_MOD,
 		action = wezterm.action.SendKey({ key = "w", mods = "CTRL" }),
 	},
+	{
+		key = "LeftArrow",
+		mods = CURSOR_MOD,
+		action = act.SendKey({
+			key = "b",
+			mods = "ALT",
+		}),
+	},
+	{
+		key = "RightArrow",
+		mods = CURSOR_MOD,
+		action = act.SendKey({ key = "f", mods = "ALT" }),
+	},
+	{
+		key = "r",
+		mods = "CTRL|ALT|SHIFT",
+		action = wezterm.action_callback(function(win, pane)
+			local other_pane = find_other_pane(pane)
+			if other_pane then
+				win:perform_action(act.SendKey({ key = "c", mods = "CTRL" }), other_pane)
+				win:perform_action(act.SendKey({ key = "UpArrow" }), other_pane)
+				other_pane:activate()
+			end
+		end),
+	},
+	{
+		key = "r",
+		mods = "CTRL|ALT",
+		action = wezterm.action_callback(function(win, pane)
+			local other_pane = find_other_pane(pane)
+			if other_pane then
+				win:perform_action(act.SendKey({ key = "c", mods = "CTRL" }), other_pane)
+				win:perform_action(act.SendKey({ key = "UpArrow" }), other_pane)
+				win:perform_action(act.SendKey({ key = "Enter" }), other_pane)
+			end
+		end),
+	},
 }
-
-for i = 1, #config.keys do
-	table.insert(config.keys, tmux_keys[i])
-end
 
 -- For example, changing the color scheme:
 config.color_scheme = "Tokyo Night Moon"
@@ -294,7 +342,7 @@ config.colors = {
 	-- selection_fg = '#281733',
 
 	tab_bar = {
-		background = "#0c0b0f",
+		background = "#181616",
 		-- background = "rgba(0, 0, 0, 0%)",
 		active_tab = {
 			bg_color = "#0c0b0f",
@@ -330,7 +378,6 @@ config.window_frame = {
 -- config.window_decorations = "INTEGRATED_BUTTONS | RESIZE"
 config.window_decorations = "NONE | RESIZE"
 if wezterm.target_triple:find("windows") then
-	print("windows!")
 	config.default_prog = { "powershell.exe", "-NoLogo" }
 	config.default_domain = "WSL:Ubuntu"
 end
