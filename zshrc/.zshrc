@@ -75,6 +75,7 @@ alias kanata="~/dotfiles/kanata/kanata -c ~/dotfiles/kanata/.kanata"
 export PATH="/snap/bin/:$PATH"
 export PATH="$HOME/go/bin/:$PATH"
 export PATH="$HOME/.local/bin/:$PATH"
+export PATH="$HOME/.local/share/nvim/mason/bin/:$PATH"
 
 export XDG_CONFIG_HOME="$HOME/.config"
 
