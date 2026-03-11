@@ -241,6 +241,22 @@ config.keys = { -- Navigate Splits
 	},
 	-- Copy Mode
 	{ key = "y", mods = "CTRL|ALT", action = act.ActivateCopyMode },
+	{
+		key = "g",
+		mods = "CTRL|ALT",
+		action = wezterm.action.QuickSelectArgs({
+			label = "open url",
+			patterns = {
+				"https?://\\S+",
+			},
+			action = wezterm.action_callback(function(window, pane)
+				local url = window:get_selection_text_for_pane(pane)
+				wezterm.log_info("opening: " .. url)
+				wezterm.open_with(url)
+			end),
+		}),
+	},
+	{ key = "g", mods = "CTRL", action = act.OpenLinkAtMouseCursor },
 	-- Find
 	{ key = "/", mods = "CTRL|ALT", action = act.Search("CurrentSelectionOrEmptyString") },
 	{
@@ -323,6 +339,18 @@ config.keys = { -- Navigate Splits
 		end),
 	},
 }
+
+if wezterm.gui then
+	-- local copy_mode = wezterm.gui.default_key_tables().copy_mode
+	-- local copy_mode_extensions = {
+	-- 	{ key = "g", mods = "CTRL", action = "OpenLinkAtMouseCursor" },
+	-- 	{ key = "g", mods = "CTRL|ALT", action = "OpenLinkAtMouseCursor" },
+	-- }
+	-- for _, key_bind in ipairs(copy_mode_extensions) do
+	-- 	table.insert(copy_mode, key_bind)
+	-- end
+	-- config.key_tables.copy_mode = copy_mode
+end
 
 -- For example, changing the color scheme:
 config.color_scheme = "Tokyo Night Moon"
