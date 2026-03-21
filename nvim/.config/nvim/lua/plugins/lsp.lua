@@ -155,16 +155,12 @@ return {
 			--				For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
 			-- etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
 			local servers = {
-				-- clangd = {},
-				gopls = {},
 				harper_ls = {
 					filetypes = {
 						"markdown",
 						"md",
 					},
 				},
-				pyrefly = {},
-
 				lua_ls = {
 					on_attach = function(_, bufnr)
 						vim.bo[bufnr].sw = 4
@@ -186,7 +182,8 @@ return {
 
 			local ensure_installed = vim.tbl_keys(servers or {})
 			vim.list_extend(ensure_installed, {
-				"stylua", -- Used to format Lua code
+				"lua_ls",
+				"stylua",
 			})
 			require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
 
