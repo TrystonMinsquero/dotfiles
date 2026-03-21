@@ -3,15 +3,16 @@
 # run with 
 # curl -fsSL https://raw.githubusercontent.com/TrystonMinsquero/dotfiles/main/install.sh -o install.sh && vim install.sh && sudo ./install.sh && rm install.sh
 
-# Delete this once you've read the entire script 
-echo "Read through this script so you know what you're installing!"
-exit 1
+echo "Installing packages..."
+sudo apt install zsh fzf ripgrep stow lazygit git gh
 
 # Install oh-my-zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-echo "Installing packages..."
-sudo apt install neovim fzf ripgrep stow lazygit git gh
+curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+sudo rm -rf /opt/nvim-linux-x86_64
+sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
+sudo rm -rf nvim-linux-x86_64.tar.gz
 
 echo "Installation complete..."
 
@@ -30,7 +31,7 @@ cd $HOME/dotfiles || exit
 
 # Stow dotfiles packages
 echo "Stowing dotfiles..."
-stow nvim zshrc
+stow nvim zshrc tmux
 
 source ~/.zshrc
 
