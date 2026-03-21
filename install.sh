@@ -4,7 +4,7 @@
 # curl -fsSL https://raw.githubusercontent.com/TrystonMinsquero/dotfiles/main/install.sh -o install.sh && vim install.sh && sudo ./install.sh && rm install.sh
 
 echo "Installing packages..."
-sudo apt install zsh fzf ripgrep stow lazygit git gh
+sudo apt install zsh fzf ripgrep stow lazygit git gh zip unzip
 
 # Install oh-my-zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
