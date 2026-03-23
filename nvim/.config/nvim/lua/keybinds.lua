@@ -66,7 +66,7 @@ vim.keymap.set("n", "<leader>x", toggle_checkbox, { desc = "[T]oggle Checkbo[x]"
 vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 vim.keymap.set("t", "<C-n><C-n>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
-vim.keymap.set("n", "<leader>w", ":w<CR>", { desc = "[W]rite" })
+vim.keymap.set("n", "<leader>w", ":wa<CR>", { desc = "[W]rite" })
 
 -- Vim config
 vim.keymap.set("n", "<leader>vi", ":e ~/.config/nvim/init.lua<CR>", { desc = "Edit [V]im [I]nit config" })
