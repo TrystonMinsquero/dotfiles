@@ -1,0 +1,68 @@
+
+set clipboard+=unnamedplus
+set clipboard+=ideaput
+
+set highlightedyank
+set which-key
+set commentary
+
+set scrolloff=5
+set incsearch
+set ignorecase smartcase
+set hlsearch
+set number relativenumber
+
+set noerrorbells
+
+let mapleader=" "
+nnoremap <leader>w :wa<CR> 
+nnoremap <leader>vc :e ~/.ideavimrc<CR>
+nnoremap <leader>vr :action IdeaVim.ReloadVimRc.reload<CR>
+
+nnoremap cr lbea&<ESC>
+nnoremap cp lbea*<ESC>
+nnoremap ccr lbiconst <ESC>ea&<ESC>
+nnoremap ccp lbiconst <ESC>ea*<ESC>
+nnoremap co lbiconst <ESC>l
+nnoremap <leader>rc lbbdw
+
+map <leader>br <Action>(Run)
+map <leader>bd <Action>(Debug)
+map <leader>d <Action>(Debug)
+map <leader>bs <Action>(Stop)
+map <leader>z <Action>(ToggleDistractionFreeMode)
+
+" What lsp's traditional do
+map <leader>ln <Action>(RenameElement)
+map <leader>n <Action>(RenameElement)
+map <leader>lr <Action>(FindUsages)
+map <C-c> <Action>(FindUsages)
+map <leader>a <Action>(ShowIntentionActions)
+
+" Searching
+map <leader>se <Action>(SearchEverywhere)
+map <leader>sf <Action>(GotoFile)
+map <leader>ss <Action>(GotoSymbol)
+map <leader>sg <Action>(TextSearchAction)
+map <leader>st <Action>(TextSearchAction)
+map <leader>sa <Action>(FindAction)
+
+map <leader>te <Action>(HideActiveWindow)
+map <leader>e <Action>(ActivateProjectToolWindow)
+
+	
+map <leader>hh <Action>(Vcs.ShowTabbedFileHistory)
+map <leader>hr <Action>(Vcs.RollbackChangedLines)
+map ]c <Action>(VcsShowNextChangeMarker)
+map [c <Action>(VcsShowPrevChangeMarker)
+map <leader>hn <Action>(VcsShowNextChangeMarker)
+map <leader>hp <Action>(VcsShowPrevChangeMarker)
+
+map <C-w> <Action>(CloseContent)
+map <leader>q <Action>(ActivateBuildToolWindow)
+map <C-J> <Action>(NextOccurence)
+map <C-K> <Action>(PreviousOccurence)
+
+map <leader>f <Action>(ReformatCode)
+map <leader>tb <Action>(ToggleLineBreakpoint)
+map <leader>o <Action>(FileStructurePopup)
