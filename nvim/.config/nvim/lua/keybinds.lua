@@ -89,10 +89,10 @@ vim.keymap.set("n", "<C-w><C-q>", "<C-w>q") -- prevents accidental <C-q>
 -- vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
 -- vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
 
-vim.keymap.set("n", "<down>", ":m .+1<CR>==") -- move line up(n)
-vim.keymap.set("n", "<up>", ":m .-2<CR>==") -- move line down(n)
-vim.keymap.set("v", "<down>", ":m '>+1<CR>gv=gv")
-vim.keymap.set("v", "<up>", ":m '<-2<CR>gv=gv")
+vim.keymap.set("n", "<C-down>", ":m .+1<CR>==") -- move line up(n)
+vim.keymap.set("n", "<C-up>",   ":m .-2<CR>==") -- move line down(n)
+vim.keymap.set("v", "<C-down>", ":m '>+1<CR>gv=gv")
+vim.keymap.set("v", "<C-up>",   ":m '<-2<CR>gv=gv")
 
 vim.keymap.set("n", "<leader>d", function()
 	local out = vim.fn.system("source $HOME/.scripts/todo.sh && today_todo")
