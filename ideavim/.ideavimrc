@@ -19,17 +19,18 @@ nnoremap <leader>w :wa<CR>
 nnoremap <leader>vc :e ~/.ideavimrc<CR>
 nnoremap <leader>vr :action IdeaVim.ReloadVimRc.reload<CR>
 
-nnoremap cr lbea&<ESC>
-nnoremap cp lbea*<ESC>
-nnoremap ccr lbiconst <ESC>ea&<ESC>
-nnoremap ccp lbiconst <ESC>ea*<ESC>
-nnoremap co lbiconst <ESC>l
+nnoremap cr lBEa&<ESC>
+nnoremap cp lBEa*<ESC>
+nnoremap ccr lBiconst <ESC>Ea&<ESC>
+nnoremap ccp lBiconst <ESC>Ea*<ESC>
+nnoremap co lBiconst <ESC>l
 nnoremap <leader>rc lbbdw
 
 map <leader>br <Action>(Run)
 map <leader>bd <Action>(Debug)
 map <leader>d <Action>(Debug)
 map <leader>bs <Action>(Stop)
+map <leader>. <Action>(Stop)
 map <leader>z <Action>(ToggleDistractionFreeMode)
 
 " What lsp's traditional do
