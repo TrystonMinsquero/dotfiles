@@ -17,6 +17,20 @@ return {
 			-- - sr)'  - [S]urround [R]eplace [)] [']
 			require("mini.surround").setup()
 
+			local function quick_surround(key)
+				vim.keymap.set(
+					"n",
+					"<leader>" .. key,
+					"saiW" .. key,
+					{ desc = 'Surround Add ' .. key .. ' Inside Word', remap = true }
+				)
+			end
+			quick_surround("`")
+			quick_surround("~")
+			quick_surround("'")
+			quick_surround('"')
+			quick_surround("*")
+
 			require("mini.align").setup()
 
 			-- Simple and easy statusline.
