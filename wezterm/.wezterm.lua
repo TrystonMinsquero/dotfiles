@@ -114,7 +114,7 @@ config.keys = { -- Navigate Splits
 	-- Workspace Management
 	{
 		key = "s",
-		mods = "CTRL|ALT",
+		mods = "CTRL|ALT|SHIFT",
 		action = act.ShowLauncherArgs({
 			flags = "FUZZY|WORKSPACES",
 		}),
@@ -153,15 +153,15 @@ config.keys = { -- Navigate Splits
 		}),
 	},
 	{
-		key = "v",
+		key = "s",
 		mods = "CTRL|ALT",
 		action = act.SplitPane({
-			direction = "Right",
+			direction = "Down",
 			size = { Percent = 50 },
 		}),
 	},
 	{
-		key = "%",
+		key = "v",
 		mods = "CTRL|ALT",
 		action = act.SplitPane({
 			direction = "Right",
@@ -230,15 +230,6 @@ config.keys = { -- Navigate Splits
 	{ key = "PageDown", action = act.ScrollByPage(0.5) },
 	{ key = "PageUp", mods = "SHIFT", action = act.ScrollByPage(-1.0) },
 	{ key = "PageDown", mods = "SHIFT", action = act.ScrollByPage(1.0) },
-	{
-		key = "s",
-		mods = "SHIFT|CTRL|ALT",
-		action = wezterm.action_callback(function(window, _)
-			local overrides = window:get_config_overrides() or {}
-			overrides.scroll_to_bottom_on_input = not overrides.scroll_to_bottom_on_input
-			window:set_config_overrides(overrides)
-		end),
-	},
 	-- Copy Mode
 	{ key = "y", mods = "CTRL|ALT", action = act.ActivateCopyMode },
 	{
