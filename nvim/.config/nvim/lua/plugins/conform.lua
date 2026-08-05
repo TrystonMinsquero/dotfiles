@@ -19,8 +19,8 @@ return {
 				-- Disable "format_on_save lsp_fallback" for languages that don't
 				-- have a well standardized coding style. You can add additional
 				-- languages here or re-enable it for the disabled ones.
-				local disable_filetypes = { c = true, cpp = true }
-				if disable_filetypes[vim.bo[bufnr].filetype] then
+				local enable_filestypes = { go = true }
+				if not enable_filestypes[vim.bo[bufnr].filetype] then
 					return nil
 				else
 					return {
@@ -29,8 +29,10 @@ return {
 					}
 				end
 			end,
+			-- See all using :help conform-formatters
 			formatters_by_ft = {
 				lua = { "stylua" },
+				markdown = { "mdformat" },
 				-- Conform can also run multiple formatters sequentially
 				-- python = { "isort", "black" },
 				--
@@ -38,5 +40,11 @@ return {
 				-- javascript = { "prettierd", "prettier", stop_after_first = true },
 			},
 		},
+		config = function(_, opts)
+			require("conform").setup(opts)
+			vim.api.nvim_create_user_command("AddFormatter", function (args)
+				-- require("conform").formatters_by_ft	
+			end, {})
+		end
 	},
 }
