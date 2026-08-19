@@ -38,6 +38,13 @@ return {
 				desc = "Live fffuzy grep",
 			},
 			{
+				"<leader>fr",
+				function()
+					require("fff").resume()
+				end,
+				desc = "Resume last fff finder",
+			},
+			{
 				"<leader>fw",
 				function()
 					require("fff").live_grep_under_cursor()
