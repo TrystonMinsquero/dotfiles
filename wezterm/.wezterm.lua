@@ -60,6 +60,98 @@ wezterm.global_key_assignments = {
 	[{ modifiers = "CTRL|SHIFT", key = "N" }] = act.DisableDefaultAssignment,
 }
 
+-- Equivalent to POSIX basename(3)
+-- Given "/foo/bar" returns "bar"
+-- Given "c:\\foo\\bar" returns "bar"
+---@param s string
+---@return string
+local function basename(s)
+	return string.gsub(s, "(.*[/\\])(.*)", "%2")
+end
+
+---@param path string file path to expand 
+---@param home_path string? home path to expand ~
+---@param cwd string? current working directory to always convert to absolute path
+---@return string
+local function canonicalizePath(path, home_path, cwd)
+	-- 1. Standardize all incoming separators to forward slashes
+	path = path:gsub("\\", "/")
+	if home_path then
+		home_path = home_path:gsub("\\", "/")
+	end
+	if cwd then
+		cwd = cwd:gsub("\\", "/")
+	end
+
+	-- 2. Expand Tilde (~) if home_path is provided
+	if home_path and path:sub(1, 1) == "~" then
+		if home_path:sub(-1) == "/" then
+			home_path = home_path:sub(1, -2)
+		end
+		if path == "~" then
+			path = home_path
+		elseif path:sub(2, 2) == "/" then
+			path = home_path .. path:sub(2)
+		end
+	end
+
+	-- 3. Prepend cwd if path is relative and cwd is provided
+	local is_absolute = path:sub(1, 1) == "/"
+	if not is_absolute and cwd then
+		if cwd:sub(-1) == "/" then
+			cwd = cwd:sub(1, -2)
+		end
+		path = cwd .. "/" .. path
+		is_absolute = true -- Path is now absolute because it stems from cwd
+	end
+
+	-- 4. Tokenize and resolve '.' and '..'
+	local parts = {}
+	for part in path:gmatch("([^/]+)") do
+		if part == ".." then
+			if #parts > 0 and parts[#parts] ~= ".." then
+				table.remove(parts)
+			elseif not is_absolute then
+				table.insert(parts, "..")
+			end
+		elseif part ~= "." then
+			table.insert(parts, part)
+		end
+	end
+
+	-- 5. Reconstruct final string
+	local result = table.concat(parts, "/")
+	if is_absolute then
+		result = "/" .. result
+	end
+
+	return result == "" and "." or result
+end
+
+--- Get base name of current foreground program
+---@param pane Pane
+---@return string
+local function pane_prog(pane)
+	return basename(pane:get_foreground_process_name())
+end
+
+---@param pane Pane Current pane, will check this first then others in the same tab
+---@param prog string the base name of the program you're looking for
+---@return Pane?
+local function find_pane_using(pane, prog)
+	prog = basename(prog)
+	if pane_prog(pane) == prog then
+		return pane
+	end
+	for _, other_pane in ipairs(pane:tab():panes()) do
+		-- wezterm.log_info("Pane ", other_pane:pane_id(), " = ", other_pane:get_foreground_process_name())
+		if pane_prog(other_pane) == prog then
+			return other_pane
+		end
+	end
+	return nil
+end
+
 local function find_other_pane(pane)
 	for _, other_pane in ipairs(pane:tab():panes()) do
 		if other_pane:pane_id() ~= pane:pane_id() then
@@ -244,6 +336,76 @@ config.keys = { -- Navigate Splits
 				local url = window:get_selection_text_for_pane(pane)
 				wezterm.log_info("opening: " .. url)
 				wezterm.open_with(url)
+			end),
+		}),
+	},
+	{
+		key = "f",
+		mods = "CTRL|ALT",
+		action = act.QuickSelectArgs({
+			label = "open file",
+			patterns = {
+				[=[[a-zA-Z0-9_.\/~-]+:\d+]=],
+			},
+			-- Note the parameters: window, pane, id, label
+			action = wezterm.action_callback(function(window, pane)
+				local selection = window:get_selection_text_for_pane(pane)
+				local file_path, line_num = selection:match("([^:]+):(%d+)")
+				if not (file_path and line_num) then
+					wezterm.log_error("file_path:", file_path, "| line_num:", line_num, " are not valid")
+					window:toast_notification(
+						"WezTerm Error",
+						string.format("selection not found:\n%s", selection),
+						nil, -- No icon
+						4000 -- Duration in milliseconds (4 seconds)
+					)
+					return
+				end
+
+				local function starts_with(src, prefix)
+					return src:sub(1, #prefix) == prefix
+				end
+				local function make_relative(target, base)
+					-- Ensure trailing slash on base path for clean splitting
+					if not base:match("/$") then
+						base = base .. "/"
+					end
+					-- If target starts with base, strip it off
+					if target:find(base, 1, true) == 1 then
+						return target:sub(#base + 1)
+					end
+					return target -- fallback if no common prefix
+				end
+
+				-- Try make path abosolute
+				local cwdUrl = pane:get_current_working_dir()
+				local cwd = cwdUrl and cwdUrl.file_path
+				file_path = canonicalizePath(file_path, wezterm.home_dir, cwd)
+				wezterm.log_info(file_path)
+				-- end
+
+				line_num = math.max(tonumber(line_num), 1)
+				local nvim_pane = find_pane_using(pane, "nvim")
+				if nvim_pane == nil then -- Open Nvim in current pane
+					window:perform_action(act.SendKey({ key = "u", mods = "CTRL" }), pane)
+					local text = "nvim +" .. line_num .. " " .. file_path
+					wezterm.log_info("Ran cmd |", text)
+					for char in text:gmatch(".") do
+						window:perform_action(act.SendKey({ key = char }), pane)
+					end
+					window:perform_action(act.SendKey({ key = "Enter" }), pane)
+				else -- Open file in current nvim pane
+					if nvim_pane ~= pane then
+						nvim_pane:activate()
+					end
+					window:perform_action(act.SendKey({ key = "Escape" }), nvim_pane)
+					local cmd = ":e +" .. line_num .. " " .. file_path
+					wezterm.log_info("Ran nvim cmd |", cmd)
+					for char in cmd:gmatch(".") do
+						window:perform_action(act.SendKey({ key = char }), nvim_pane)
+					end
+					window:perform_action(act.SendKey({ key = "Enter" }), nvim_pane)
+				end
 			end),
 		}),
 	},
