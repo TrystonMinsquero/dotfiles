@@ -34,6 +34,8 @@ vim.o.breakindent = true
 vim.o.undofile = true
 vim.o.swapfile = false
 
+vim.opt.makeprg = "./build.sh"
+
 -- Folds
 vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 vim.o.foldmethod = "expr"
