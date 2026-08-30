@@ -76,6 +76,10 @@ export PATH="/snap/bin/:$PATH"
 export PATH="$HOME/go/bin/:$PATH"
 export PATH="$HOME/.local/bin/:$PATH"
 export PATH="$HOME/.local/share/nvim/mason/bin/:$PATH"
+export PATH="$HOME/.cargo/bin:$PATH"
+if [ -f "$HOME/.cargo/env" ]; then
+    source "$HOME/.cargo/env"
+fi
 
 export XDG_CONFIG_HOME="$HOME/.config"
 
