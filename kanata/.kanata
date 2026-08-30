@@ -1,3 +1,4 @@
+;; 
 ;; Home row mods QWERTY example with more complexity.
 ;; Some of the changes from the basic example:
 ;; - when a home row mod activates tap, the home row mods are disabled
@@ -21,7 +22,7 @@
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   esc  @a   @s   @d   @f   g    h    @j    @k    @l    @;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
-  lctl lmet bspc           spc            del rmet rctl
+  lmet lalt lctrl          spc            lctrl lalt lmeta
 )
 
 (deflayer regular
