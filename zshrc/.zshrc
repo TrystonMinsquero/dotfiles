@@ -33,9 +33,6 @@ set -o vi
 # bindkey '^I' autosuggest-accept
 # bindkey -M viins '^I^I' expand-or-complete
 
-# Set up fzf key bindings and fuzzy completion
-source <(fzf --zsh)
-
 uname_out=$(uname -a)
 case "${uname_out}" in
     *Microsoft*|*microsoft*) 
@@ -70,7 +67,6 @@ alias nvimconf="nvim ~/.config/nvim/init.lua"
 alias ghosttyconf="nvim ~/.config/ghostty/config"
 alias wezconf="nvim ~/.wezterm.lua"
 alias tmuxconf="nvim ~/.tmux.conf"
-alias kanata="~/dotfiles/kanata/kanata -c ~/dotfiles/kanata/.kanata"
 
 export PATH="/snap/bin/:$PATH"
 export PATH="$HOME/go/bin/:$PATH"
@@ -91,9 +87,6 @@ function grt()
 if [ -f ~/.fzf.zsh ]; then 
 	# Use install version of fzf if it exists
 	source ~/.fzf.zsh
-else
-	# Set up fzf key bindings and fuzzy completion
-	source <(fzf --zsh)
 fi
 
 # Useful for having machine specific configs
@@ -101,7 +94,3 @@ if [ -f "$HOME/.zshrc_extra" ]; then
     source "$HOME/.zshrc_extra"
 fi
 
-source $HOME/.scripts/journal.sh
-source $HOME/.scripts/todo.sh
-
-alias j="journal_today"
