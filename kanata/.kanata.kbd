@@ -22,7 +22,7 @@
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   esc  @a   @s   @d   @f   g    h    @j    @k    @l    @;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
-  lmet lalt lctrl          spc            lctrl lalt lmeta
+  lmet lalt @bvim          spc            lctrl lalt lmeta
 )
 
 (deflayer regular
@@ -34,11 +34,11 @@
 )
 
 (deflayer vim
-  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc
-  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
-  esc  a    s    d    f    g    h    j    k    l    ;    '    ret
-  lsft z    x    c    v    b    n    m    ,    .    /    rsft
-  lctl lmet lalt           spc            ralt rmet rctl
+  @grl 1     2    3     4     5    6     7     8    9     0     -    =    bspc
+  tab  q     @cw  e     @redo @ct  @copy @undo @gn  @gp   @pste @pt  @nt  \
+  esc  lmet  lalt lctl  lsft  g    left  down  up   right ;     '    ret
+  lsft @undo @cut @copy @pste @pw  n     m     @pw  @nw   @find rsft
+  lctl lmet @bvim           spc            ralt rmet rctl
 )
 
 (defvar
@@ -54,12 +54,30 @@
 ;;
 ;; Aliases are referred to by `@<alias_name>`.
 (defalias
-  ;; tap: backtick (grave), hold: toggle layer-switching layer while held
+  ;; tap: backtick (grave), hold: toggle layer-switching layer while eld
   grl (tap-hold 200 200 grv (layer-toggle layers))
 
-  ;; layer-switch changes the base layer.
+  ;; layer-swtch changes the base layer.
   l1 (layer-switch $main)
   l2 (layer-switch $norm)
+
+  lvim (layer-toggle vim)
+  bvim (tap-hold-press 200 150 bspc @lvim)
+
+  undo  C-z
+  redo  C-S-z
+  pste C-v
+  copy  C-c
+  cut  C-x
+  find C-f     ;; prev   tab
+  nt   C-tab   ;; next   tab
+  pt   C-S-tab ;; prev   tab
+  nw   C-right ;; next   word
+  pw   C-left  ;; prev   tab
+  ct   C-t     ;; create tab
+  cw   C-t     ;; close  window
+  gn   A-right ;; go to next tab
+  gp   A-left  ;; go to prev tab
 )
 
 ;; The `lrld` action stands for "live reload". This will re-parse everything
