@@ -1,11 +1,13 @@
 ;; 
-;; Home row mods QWERTY example with more complexity.
-;; Some of the changes from the basic example:
-;; - when a home row mod activates tap, the home row mods are disabled
-;;   while continuing to type rapidly
-;; - tap-hold-release helps make the hold action more responsive
-;; - pressing another key on the same half of the keyboard
-;;   as the home row mod will activate an early tap action
+
+(defcfg
+  process-unmapped-keys yes   ;; required to make non mapped keys behave nicely with remapped ones
+  block-unmapped-keys no      ;; turns every other unmapped key into a non-op key
+  concurrent-tap-hold yes     ;; required to allow for combos and tap-hold-release features to coexist
+  delegate-to-first-layer yes ;; defaults to source, but this will default transparent keys (_) to first custom layer
+  chords-v2-min-idle 350      ;; same as require-prior-idle from ZMK but only for for combos
+)
+
 (defsrc
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
@@ -22,7 +24,7 @@
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   esc  @a   @s   @d   @f   g    h    @j    @k    @l    @;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
-  lmet lalt @bvim          spc            lctrl lalt lmeta
+  lalt lmet lctl        @spcvim            lctl lalt lmeta
 )
 
 (deflayer regular
@@ -35,10 +37,10 @@
 
 (deflayer vim
   @grl 1     2    3     4     5    6     7     8    9     0     -    =    bspc
-  tab  q     @cw  e     @redo @ct  @copy @undo @gn  @gp   @pste @pt  @nt  \
+  tab  q     w    e     @redo @ct  @copy @undo @gn  @gp   @pste @pt  @nt  \
   esc  lmet  lalt lctl  lsft  g    left  down  up   right ;     '    ret
   lsft @undo @cut @copy @pste @pw  n     m     @pw  @nw   @find rsft
-  lctl lmet @bvim           spc            ralt rmet rctl
+  lalt lmet lctl           spc       ralt rmet rctl
 )
 
 (defvar
@@ -63,6 +65,7 @@
 
   lvim (layer-toggle vim)
   bvim (tap-hold-press 200 150 bspc @lvim)
+  spcvim (tap-hold-press 200 150 spc @lvim)
 
   undo  C-z
   redo  C-S-z
