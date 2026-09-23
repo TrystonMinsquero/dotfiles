@@ -68,6 +68,11 @@ vim.o.confirm = true
 vim.o.shell = "/bin/zsh"
 
 vim.opt.termguicolors = true
+vim.filetype.add({
+  extension = {
+    kbd = "clojure", -- Treat Kanata files as Clojure for structural Lisp editing
+  },
+})
 
 -- vim.api.nvim_create_autocmd("BufEnter", {
 -- 	desc = "Set options to enable hard word wrapping",
