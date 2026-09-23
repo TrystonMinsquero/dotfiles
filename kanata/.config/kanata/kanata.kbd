@@ -51,17 +51,18 @@
       )
 
       ;; home row mods
-      a (t! lhrm   $tapping-term        a lmet  )
-      s (t! lhrm   $tapping-term        s lalt   )
+      a (t! lhrm   $tapping-term        a lmet    )
+      s (t! lhrm   $tapping-term        s lalt    )
       d (t! lhrm   $tapping-term        d lctrl   )
-      f (t! lhrm   $tapping-term        f lsft   )
-      g (t! lhrm   $tapping-term        g @hyper )
+      f (t! lhrm   $tapping-term        f lsft    )
+      g (t! lhrm   $tapping-term        g @hyper  )
   
-      h (t! rhrm   $tapping-term        h @hyper )
-      j (t! rhrm   $tapping-term        j lsft   )
-      k (t! rhrm   $tapping-term        k lctrl  )
-      l (t! rhrm   $tapping-term        l lalt   )
-      ; (t! rhrm   $tapping-term        ; lmet  )
+      h (t! rhrm   $tapping-term        h @hyper  )
+      j (t! rhrm   $tapping-term        j lsft    )
+      k (t! rhrm   $tapping-term        k lctrl   )
+      l (t! rhrm   $tapping-term        l lalt    )
+      ; (t! rhrm   $tapping-term        ; lmet    )
+
 
       ;; all the other alfas and def regular typing characters for require-prior-idle-like behavior as suggested by sgraar here (https://www.reddit.com/r/ErgoMechKeyboards/comments/1qosvc0/comment/o7cmdzd/)
       q (t! nomod q)
@@ -69,7 +70,7 @@
       e (t! nomod e)
       r (t! nomod r)
       t (t! nomod t)
-      
+
       y (t! nomod y)
       u (t! nomod u)
       i (t! nomod i)
@@ -96,6 +97,11 @@
       bvim (tap-hold-press 199 150 bspc @lvim)
       spcvim (tap-hold-press 200 150 spc @lvim)
 
+      lnum (layer-while-held num)
+      lctrl (tap-hold-press 200 150 C-bspc @lnum)
+      lfun (layer-while-held fun)
+      lmet (tap-hold-press 200 150 lmet @lfun)
+
       spc @spcvim
 
       undo C-z
@@ -113,36 +119,6 @@
       gn   A-right ;; go to next tab
       gp   A-left  ;; go to prev tab
 
-
-      ;; one-shot mods for Callum style modding
-      osm (one-shot $one-shot-timeout lmet)
-      oss (one-shot $one-shot-timeout lshift)
-      osa (one-shot $one-shot-timeout lalt)
-      osc (one-shot $one-shot-timeout lctrl)
-      
-      ;; Media tap-dance on NAV
-      ppmnp (tap-dance 200 ((tap-hold $quick-tap-ms $tapping-term pp mute) next prev))
-
-      ;; Layer keys with tri-layer logic, see virtualkey logic below for an explainer on each function
-      tlnav (multi
-        (on-press   press-virtualkey    lnav)
-        (on-press   tap-virtualkey      release_all_mods)
-        (on-press   tap-virtualkey      evaluate_tri_layer)
-        (on-release tap-virtualkey      ops) ;; needed to keep sticky keys alive when returning to default layer
-        (on-release release-virtualkey  lnav)
-        (on-release release-virtualkey  swapperrcmd) ;; kills swapper right command when released (see below)
-        (on-release tap-virtualkey      evaluate_tri_layer)
-        )
-      
-      tlsym (multi
-        (on-press   press-virtualkey    lsym)
-        ;; (on-press   tap-virtualkey      release_all_mods)
-        (on-press   tap-virtualkey      evaluate_tri_layer)
-        (on-release tap-virtualkey      ops) ;; needed to keep sticky keys alive when returning to default layer
-        (on-release release-virtualkey  lsym)
-        (on-release tap-virtualkey      evaluate_tri_layer)
-        ;; my take on faking urob's tri-state module for Kanata, deactivates on release of tlnav (see above)
-      )
       swapper (multi
         (on-press   press-virtualkey    swapperrcmd)
         (on-press   tap-virtualkey      swappertab)
@@ -167,45 +143,35 @@
       capsword (caps-word-custom-toggle 5000 (a b c d e f g h i j k l m n o p q r s t u v w x y z) (lshift rshift grv apos 6 nop0 nop1 nop9 bspc))
     
       ;; num keys
-      0_sym    (tap-hold-release $tapping-term $quick-tap-ms 0 (layer-while-held sym)      )            ;; makes symbols acessible from holding 0 on keypad
-      num_spc  (multi (layer-switch def) spc)                                                           ;; cancels num_word on tap on space
-      num_nav  (tap-hold-release $tapping-term $quick-tap-ms (layer-switch def) (layer-while-held nav)) ;; cancels num_word on tap access nav on hold
-      ;; num typing macrosj
-      r$       (macro S-r S-4 spc)
-      ,00      (macro , Digit0 Digit0 spc)
+      .00      (macro . Digit0 Digit0 spc)
       000      (macro Digit0 Digit0 Digit0)
       
 )
 
 (defchordsv2
 
-  (w e r)   esc                                                                   $combo-timeout all-released  (    nav sym fun     nomods)
-  (w   r)   tab                                                                   $combo-timeout all-released  (    nav sym fun     nomods)
-  (s d f)   enter                                                                 $combo-timeout first-release (    nav sym fun     nomods)   
-  (s   f)   bspc                                                                  $combo-timeout first-release (    nav sym fun     nomods)
+  (w e r)   esc                                                                   $combo-timeout all-released  (    vim sym fun     nomods)
+  (w   r)   tab                                                                   $combo-timeout all-released  (    vim sym fun     nomods)
+  (s d f)   enter                                                                 $combo-timeout first-release (    vim sym fun     nomods)   
+  (s   f)   bspc                                                                  $combo-timeout first-release (    vim sym fun     nomods)
 
-  (u i o)   esc                                                                   $combo-timeout all-released  (    nav sym fun     nomods) ;; esc on the right side, great for NUM
-  (u   o)   tab                                                                   $combo-timeout all-released  (    nav sym fun     nomods) ;; tab on the right side, great for NUM
-  (j k l)   enter                                                                 $combo-timeout first-release (    nav sym fun     nomods)  
-  (j   l)   bspc                                                                  $combo-timeout first-release (    nav sym fun     nomods)
+  (u i o)   esc                                                                   $combo-timeout all-released  (    vim sym fun     nomods) ;; esc on the right side, great for NUM
+  (u   o)   tab                                                                   $combo-timeout all-released  (    vim sym fun     nomods) ;; tab on the right side, great for NUM
+  (j k l)   enter                                                                 $combo-timeout first-release (    vim sym fun     nomods)  
+  (j   l)   bspc                                                                  $combo-timeout first-release (    vim sym fun     nomods)
 
 
-  (d k)     @capsword                                                             $combo-timeout all-released  (    nav sym fun num       ) ;; caps_word on home row, because why not
-  (m , .)   @toggle_num_word                                                      $combo-timeout all-released  (    nav sym fun     nomods)
+  (d k)     @capsword                                                             $combo-timeout all-released  (    vim sym fun num       ) ;; caps_word on home row, because why not
+  (m , .)   @toggle_num_word                                                      $combo-timeout all-released  (    vim sym fun     nomods)
  
-  (f rmet)  S-grave                                                               $combo-timeout all-released  (    nav sym fun num       ) ;; anachron-combo like ~ makes it posible to type it on caps_word
-  (s rmet)  S-6                                                                   $combo-timeout all-released  (    nav sym fun num       ) ;; anachron-combo like ^ makes it posible to type it on caps_word
-  (d rmet)  S-6                                                                   $combo-timeout all-released  (    nav sym fun num       ) ;; anachron-combo like ` makes it posible to type it on caps_word
+  (f rmet)  S-grave                                                               $combo-timeout all-released  (    vim sym fun num       ) ;; anachron-combo like ~ makes it posible to type it on caps_word
+  (s rmet)  S-6                                                                   $combo-timeout all-released  (    vim sym fun num       ) ;; anachron-combo like ^ makes it posible to type it on caps_word
+  (d rmet)  S-6                                                                   $combo-timeout all-released  (    vim sym fun num       ) ;; anachron-combo like ` makes it posible to type it on caps_word
   
-  (g h)     lrld                                                                  $combo-timeout all-released  (def nav sym     num nomods) ;; reloads config from fun
+  (g h)     lrld                                                                  $combo-timeout all-released  (def vim sym     num nomods) ;; reloads config from fun
  
-  (q w e r) @toggle_muggle_mode                                                   $combo-timeout all-released  (    nav sym fun num       )  
+  (q w e r) @toggle_muggle_mode                                                   $combo-timeout all-released  (    vim sym fun num       )  
 
-)
-
-(defoverrides
-  (lctrl volu) (🔆) ;; vol + brightness on NAV
-  (lctrl vold) (🔅) ;; vol + brightness on NAV
 )
 
 (defvirtualkeys  
@@ -216,24 +182,12 @@
   swapperrcmd rmet ;; For swapper implementation
   swappertab tab   ;; sending tab on every new press during swapper activation
 
-  ;; Tri-layer logic
-  lnav nop0 ;; no output keys for tri-layer logic function
-  lsym nop1 ;; no output keys for tri-layer logic function
-  
-  evaluate_tri_layer (switch ;; swtiches the layer based on wich layer keys are pressed
-    ((and nop0 nop1)) (layer-switch fun) break
-    ((and nop0 (not nop1))) (layer-switch nav) break
-    ((and nop1 (not nop0))) (layer-switch sym) break
-    ((not (and nop0 nop1))) (layer-switch def) break
-  )
-
   release_all_mods nop9 ;; this absorbs all queued one shot mods, cancelling them
-
 )
 
 ;; source keys
 (defsrc
-  f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 ;; those need to be here to allow for macOS function keys to process rather than regular function keys
+ f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 ;; those need to be here to allow for macOS function keys to process rather than regular function keys
   q w e r t     y u i o p
   a s d f g     h j k l ;
   z x c v b     n m , . / 
@@ -245,8 +199,8 @@
   🔅 🔆 mctl sls dtn dnd ◀◀ ▶⏸ ▶▶ 🔇 🔉 🔊
  @q   @w @e    @r  @t        @y  @u  @i  @o  @p
  @a   @s @d    @f  @g        @h  @j  @k  @l  @;
- @zfn @x @cnum @v  @b        @n  @m  @,  @.  /
-        @num @tlnav   @spc  @tlsym
+ @z   @x @cnum @v  @b        @n  @m  @,  @.  /
+      @lmet @lctrl  @spcvim  S--
 )
 
 (deflayer nomods ;; temporarily switch to a layer with no hold-taps to emulate ZMK require-prior-idle setting on home row mods definition
@@ -259,18 +213,10 @@
 
 (deflayer num
   f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12
-  A-9   A-0   XX    @r$   A-6            S-= 7 8 9 S-8
-  @osc  @osa  @oss  @osm  bspc           -   4 5 6 /
-  XX    @oss  XX    @000  @,00           ,   1 2 3 .
-                    _  @num_nav @num_spc @0_sym
-)
-
-(deflayer nav
-  f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12
-  tab   @swapper S-C-tab C-tab  M-rbrc    pgup   home  up    end   bspc
-  @osc  @osa     @oss    @osm   M-lbrc    pgdn   left  down  right enter
-  M-z   M-x      M-c     M-v    f18       @ppmnp f19   vold  volu  del  
-                              _ _      _  _ 
+  S-1 S-2 S-3 S-4 S-5 S-6  S-7  S-8 S-9 S-0
+  1   2   3   4   5   6    7    8   9   0
+  C-z C-x C-c C-v _   @.00 @000 ,   .   /
+       lalt lctrl  spc lalt
 )
 
 (deflayer vim
@@ -278,23 +224,23 @@
   q     w    e     @redo @ct  @copy @undo @gn  @gp   @pste ;; @pt  @nt  \
   lmet  lalt lctl  lsft  g    left  down  up   right ;
   @undo @cut @copy @pste @pw  n     m     @pw  @nw  @find 
-  lmet lctl           spc       ralt ;; rmet rctl
+  lmet  C-bspc          spc       lctrl ;; rmet rctl
 )
 
 (deflayer sym
   f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12
   esc S-lbrc lbrc S-9   S-5     S-7   S-0   rbrc  S-rbrc  S-'
-  -   S-6    grv  S-grv S-4     S-3   @osm  @oss  @osa    @osc
+  -   S-6    grv  S-grv S-4     S-3   _     _     _      _
   S-= =      S-8  ⁄     S-2     S-＼  ＼     S-⁄   S-1     S-;
                         _ _   S-- _ 
 )
 
 (deflayer fun
   f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12
-  1     2     3    4    5       6   7    8    9    0
-  @osc  @osa  @oss @osm f11     f12 @osm @oss @osa @osc
-  f1    f2    f3   f4   f5      f6  f7   f8   f9   f10 
-                        _ _ caps _  
+  1  2  3  4  5  6  7  8  9  0
+  f1 f2 f3 f4 f5 f6 f7 f8 f9 f10
+  f1 f2 f3 f4 f5 f6 f10 f11 f12 _ 
+          _ _ spc _  
 )
 
 (deflayer muggle ;; for muggle people to use the keyboard as if it were no remaps
