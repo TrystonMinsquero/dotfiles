@@ -320,6 +320,8 @@ config.keys = { -- Navigate Splits
 	{ key = "PageDown", action = act.DisableDefaultAssignment },
 	{ key = "PageUp", action = act.ScrollByPage(-0.5) },
 	{ key = "PageDown", action = act.ScrollByPage(0.5) },
+	{ key = "u", mods="CTRL|ALT", action = act.ScrollByPage(-0.5) },
+	{ key = "d", mods="CTRL|ALT", action = act.ScrollByPage(0.5) },
 	{ key = "PageUp", mods = "SHIFT", action = act.ScrollByPage(-1.0) },
 	{ key = "PageDown", mods = "SHIFT", action = act.ScrollByPage(1.0) },
 	-- Copy Mode
