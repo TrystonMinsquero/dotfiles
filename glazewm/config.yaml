@@ -168,6 +168,26 @@ window_rules:
   - commands: ['move --workspace d']
     match:
       - window_title: { equals: "discord"}
+  - commands: ['move --workspace u']
+    match:
+      - window_title: { regex: ".*[Uu]nreal.*"}
+  - commands: # Just the running game, not engine
+    - 'set-floating'
+    match:
+      - window_process: { regex: ".*Godot.*"}
+        # window_title: { regex: "^((?!Godot Engine).)*$" }
+  - commands: 
+    - 'move --workspace g'
+    - 'set-tiling'
+    match:
+      - window_process: { regex: ".*Godot.*"}
+        window_title: { regex: "Godot Engine" }
+  - commands: ['move --workspace i']
+    match:
+      - window_title: { regex: "(.*[Rr]ider.*)|(.*ugger.*)"}
+  # - commands: ['move --workspace g']
+  #   match:
+  #     - window_title: { regex: ".*[Gg]ame.*"}
   - commands: ['ignore']
     match:
       # Ignores any Zebar windows.
@@ -182,6 +202,9 @@ window_rules:
         window_class: { regex: 'HwndWrapper\[PowerToys\.PowerAccent.*?\]' }
       - window_process: { equals: 'PowerToys' }
         window_title: { regex: '.*? - Peek' }
+      - window_process: { equals: 'PowerToys' }
+        window_title: { regex: 'Environment Variables' }
+
       - window_process: { equals: 'Lively' }
         window_class: { regex: 'HwndWrapper' }
       - window_process: { equals: 'EXCEL' }
@@ -276,7 +299,10 @@ keybindings:
 
   # Change focus from tiling windows -> floating -> fullscreen.
   - commands: ['wm-cycle-focus']
-    bindings: ['alt+lwin+space']
+    bindings: ['alt+lwin+oem_period']
+
+  - commands: ['focus --recent-workspace']
+    bindings: ['alt+lwin+oem_comma']
 
   # Change the focused window to be floating.
   - commands: ['toggle-floating --centered']
@@ -309,6 +335,9 @@ keybindings:
   # Redraw all windows.
   - commands: ['wm-redraw']
     bindings: ['alt+lwin+shift+oem_plus'] # equal sign
+
+  - commands: ['wm-redraw']
+    bindings: ['alt+lwin+enter']
 
   # Change focus to a workspace defined in `workspaces` config.
   - commands: ['focus --workspace 1']
