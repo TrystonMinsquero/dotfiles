@@ -164,10 +164,10 @@ window_rules:
       - window_title: { equals: "zig-pong" }
   - commands: ['move --workspace t']
     match:
-      - window_title: { equals: "wezterm"}
+      - window_process: { equals: 'wezterm-gui' }
   - commands: ['move --workspace d']
     match:
-      - window_title: { equals: "discord"}
+      - window_process: { equals: 'Discord' }
   - commands: ['ignore']
     match:
       # Ignores any Zebar windows.
@@ -416,7 +416,7 @@ keybindings:
   #   bindings: ['alt+lwin+shift+h']
   - commands: ['move --workspace i', 'focus --workspace i']
     bindings: ['alt+lwin+shift+i']
-  - commands: ['move --workspace j', 'focus --workspace j']
+  # - commands: ['move --workspace j', 'focus --workspace j']
   #   bindings: ['alt+lwin+shift+j']
   # - commands: ['move --workspace k', 'focus --workspace k']
   #   bindings: ['alt+lwin+shift+k']
