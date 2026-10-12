@@ -6,11 +6,10 @@
 ;;
 ;; Same-hand home row keys never decide (no misfires on rolls like "as"/"df"),
 ;; so same-hand mods still stack: hold a+s, then press a right-hand key.
-;; Caps Lock = Escape.
+;; Caps Lock = Escape (in both base and plain); hold it 3 seconds = real Caps Lock.
 ;; Space held + h/j/k/l = arrows, , . = word left/right, Caps Lock = delete word.
 ;;
-;; Esc switches to plain mode (a normal keyboard, no home row mods).
-;; In plain mode, tap Esc = Escape, hold Esc = back to home row mods.
+;; Esc toggles between base and plain mode (a normal keyboard, no home row mods).
 ;;
 ;; Panic exit: LCtrl + Space + Esc.
 
@@ -58,8 +57,11 @@
   spc (tap-hold-release $quick-tap $forever spc (layer-while-held nav))
 
   plain (layer-switch plain)
-  ;; Timer-based on purpose; prior-idle off so it works right after typing.
-  to-hrm (tap-hold 300 300 esc (layer-switch base) (require-prior-idle 0))
+  to-hrm (layer-switch base)
+
+  ;; Tap = Escape (on release), hold 3s = Caps Lock.
+  ;; Prior-idle off so the hold still works right after typing.
+  caps (tap-hold 3000 3000 esc caps (require-prior-idle 0))
 )
 
 (defsrc
@@ -70,7 +72,7 @@
 )
 
 (deflayer base
-  @plain esc
+  @plain @caps
   @a @s @d @f   h @j @k @l @;
   , .
   @spc
@@ -85,7 +87,7 @@
 )
 
 (deflayer plain
-  @to-hrm caps
+  @to-hrm @caps
   a s d f   h j k l ;
   , .
   spc
