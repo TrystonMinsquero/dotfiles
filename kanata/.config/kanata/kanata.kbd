@@ -11,7 +11,9 @@
 ;;   i/o = next/prev tab, q = close app (Alt+F4), w = Ctrl+W, n/m = page down/up,
 ;;   g = Home, ; = End.
 ;;
-;; Esc toggles between base and plain mode (a normal keyboard, no home row mods).
+;; Esc = Escape. Hold Esc 1 second = toggle between base and plain mode (a normal
+;; keyboard, no home row mods). kanata-modes.py remembers the mode per app.
+;; Both modes: Right Alt = previous workspace, hold Right Ctrl 0.5s = quit app.
 ;;
 ;; Panic exit: LCtrl + Space + Esc.
 
@@ -58,8 +60,14 @@
   ;; Space: tap = space, hold (another key pressed and released) = nav layer.
   spc (tap-hold-release $quick-tap $forever spc (layer-while-held nav))
 
-  plain (layer-switch plain)
-  to-hrm (layer-switch base)
+  ;; Tap = Escape, hold 1s = switch mode.
+  plain (tap-hold 1000 1000 esc (layer-switch plain) (require-prior-idle 0))
+  to-hrm (tap-hold 1000 1000 esc (layer-switch base) (require-prior-idle 0))
+
+  ;; Previous workspace (Meta+Alt+, in KWin and GlazeWM) and a quit that
+  ;; needs a 0.5s hold, so a stray tap in a game doesn't close it.
+  prevws M-A-,
+  quit (tap-hold 500 500 rctl A-f4 (require-prior-idle 0))
 
   ;; Tap = Escape (on release), hold 3s = Caps Lock.
   ;; Prior-idle off so the hold still works right after typing.
@@ -71,7 +79,7 @@
   q w   i o
   a s d f g   h j k l ;
   n m , .
-  spc
+  spc ralt rctl
 )
 
 (deflayer base
@@ -79,7 +87,7 @@
   q w   i o
   @a @s @d @f g   h @j @k @l @;
   n m , .
-  @spc
+  @spc @prevws @quit
 )
 
 ;; Left home row is plain modifiers here so selection is instant (space+f+h = shift+left).
@@ -88,7 +96,7 @@
   A-f4 C-w   C-tab C-S-tab
   $pinky $ring $middle $index home   left down up right end
   pgdn pgup C-left C-right
-  _
+  _ _ _
 )
 
 (deflayer plain
@@ -96,5 +104,5 @@
   q w   i o
   a s d f g   h j k l ;
   n m , .
-  spc
+  spc @prevws @quit
 )
