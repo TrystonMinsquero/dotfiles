@@ -1,0 +1,13 @@
+[Unit]
+Description=Kanata keyboard remapper
+Documentation=https://github.com/jtroo/kanata
+
+[Service]
+Type=simple
+# -p: local-only TCP port so kanata-modes.py can read and set the layer
+ExecStart=/usr/bin/kanata --cfg %h/.config/kanata/kanata.kbd -p 127.0.0.1:5829
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

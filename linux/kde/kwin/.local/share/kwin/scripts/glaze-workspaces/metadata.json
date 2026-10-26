@@ -1,0 +1,14 @@
+{
+    "KPackageStructure": "KWin/Script",
+    "KPlugin": {
+        "Authors": [{ "Name": "Tryston Minsquero" }],
+        "Description": "GlazeWM-style workspaces: apps pinned to hotkey desktops, everything else gets its own desktop",
+        "EnabledByDefault": true,
+        "Icon": "preferences-system-windows-script-test",
+        "Id": "glaze-workspaces",
+        "License": "MIT",
+        "Name": "Glaze Workspaces"
+    },
+    "X-Plasma-API": "javascript",
+    "X-Plasma-MainScript": "code/main.js"
+}

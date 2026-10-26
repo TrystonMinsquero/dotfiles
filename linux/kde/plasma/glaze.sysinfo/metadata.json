@@ -1,0 +1,13 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [{ "Name": "Tryston Minsquero" }],
+        "Category": "System Information",
+        "Description": "Zebar-style CPU temperature, NVIDIA GPU power state and free RAM",
+        "Icon": "utilities-system-monitor",
+        "Id": "glaze.sysinfo",
+        "License": "MIT",
+        "Name": "System Stats"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

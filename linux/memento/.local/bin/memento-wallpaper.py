@@ -135,8 +135,19 @@ def main():
             os.remove(old)
 
     if apply:
-        subprocess.run(["plasma-apply-wallpaperimage", png], check=True)
+        set_wallpaper(png)
     print(png)
+
+
+def set_wallpaper(png):
+    """Set the wallpaper on KDE or GNOME; anywhere else just leave the image."""
+    desktop = os.environ.get("XDG_CURRENT_DESKTOP", "")
+    if "KDE" in desktop:
+        subprocess.run(["plasma-apply-wallpaperimage", png], check=True)
+    elif "GNOME" in desktop:
+        for key in ("picture-uri", "picture-uri-dark"):
+            subprocess.run(["gsettings", "set", "org.gnome.desktop.background", key,
+                            "file://" + png], check=True)
 
 
 if __name__ == "__main__":

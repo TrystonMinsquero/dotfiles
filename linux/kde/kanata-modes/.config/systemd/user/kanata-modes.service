@@ -1,0 +1,12 @@
+[Unit]
+Description=Remember kanata's mode per app
+After=kanata.service graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=%h/.local/bin/kanata-modes.py
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=graphical-session.target

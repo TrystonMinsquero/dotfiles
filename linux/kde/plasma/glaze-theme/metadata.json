@@ -1,0 +1,10 @@
+{
+    "KPlugin": {
+        "Authors": [{ "Name": "Tryston Minsquero" }],
+        "Description": "Breeze with a 40% opacity panel. Anything not in this folder falls back to the default Breeze theme.",
+        "Id": "glaze",
+        "License": "LGPL",
+        "Name": "Glaze"
+    },
+    "X-Plasma-API": "5.0"
+}

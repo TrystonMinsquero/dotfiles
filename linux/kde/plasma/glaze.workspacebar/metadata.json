@@ -1,0 +1,13 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [{ "Name": "Tryston Minsquero" }],
+        "Category": "Windows and Tasks",
+        "Description": "Zebar-style list of virtual desktops by name",
+        "Icon": "virtual-desktops",
+        "Id": "glaze.workspacebar",
+        "License": "MIT",
+        "Name": "Workspace Bar"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

@@ -4,7 +4,7 @@
 # Re-run after editing anything in the repo. Targets that are already links to
 # the repo are left alone; a differing target is backed up as <name>.~N~.
 
-DOTFILES="$(cd "$(dirname "$0")" && pwd)"
+DOTFILES="$(cd "$(dirname "$0")/.." && pwd)"
 APPDATA_DIR="$(cygpath "$APPDATA")"
 LOCALAPPDATA_DIR="$(cygpath "$LOCALAPPDATA")"
 
@@ -28,8 +28,8 @@ place() {
   echo "copied   $dst"
 }
 
-place wezterm/.wezterm.lua            "$HOME/.wezterm.lua"
-place glazewm/config.yaml             "$HOME/.glzr/glazewm/config.yaml"
-place kanata/.config/kanata/kanata.kbd "$APPDATA_DIR/kanata/kanata.kbd"
-place nvim/.config/nvim               "$LOCALAPPDATA_DIR/nvim"
-place ideavim/.ideavimrc              "$HOME/.ideavimrc"
+place common/wezterm/.wezterm.lua            "$HOME/.wezterm.lua"
+place windows/glazewm/config.yaml            "$HOME/.glzr/glazewm/config.yaml"
+place common/kanata/.config/kanata/kanata.kbd "$APPDATA_DIR/kanata/kanata.kbd"
+place common/nvim/.config/nvim               "$LOCALAPPDATA_DIR/nvim"
+place common/ideavim/.ideavimrc              "$HOME/.ideavimrc"
