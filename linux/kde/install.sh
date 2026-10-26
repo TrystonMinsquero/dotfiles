@@ -55,7 +55,7 @@ shortcut org.kde.spectacle.desktop RecordScreen                # was Meta+Alt+R 
 shortcut "KDE Keyboard Layout Switcher" "Switch to Next Keyboard Layout"        # was Meta+Alt+K
 shortcut "KDE Keyboard Layout Switcher" "Switch to Last-Used Keyboard Layout"   # was Meta+Alt+L
 for dir in Up Down Left Right; do shortcut kwin "Switch Window $dir"; done      # Meta+Alt+arrows
-shortcut plasmashell cycle-panels 402653230                    # Meta+Alt+.
+shortcut plasmashell cycle-panels 402653231                    # Meta+Alt+/ (Meta+Alt+. switches windows)
 
 echo "==> kde: panel"
 out=$(qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$(cat panel.js)")
