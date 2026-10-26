@@ -328,7 +328,7 @@ registerShortcut("Glaze: recent", "Glaze: Go to previous workspace", "Meta+Alt+,
 (function init() {
     const startDesktop = workspace.currentDesktop;
     workspace.desktops.forEach((d) => {
-        // Match by name, or by the [x] key so renamed slots ([T]erm -> [T]erminal) are kept.
+        // Match by name, or by the [x] key so a slot keeps its desktop if its name differs.
         const tag = d.name.match(/\[(.)\]/);
         const slot = SLOTS.find((s) => s.label === d.name || s.name === d.name) ||
             (tag && SLOTS.find((s) => s.key === tag[1].toLowerCase()));
