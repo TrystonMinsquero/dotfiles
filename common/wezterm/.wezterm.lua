@@ -453,6 +453,11 @@ config.keys = { -- Navigate Splits
 		mods = CURSOR_MOD,
 		action = wezterm.action.SendKey({ key = "w", mods = "CTRL" }),
 	},
+	{ -- delete word forward
+		key = "Delete",
+		mods = CURSOR_MOD,
+		action = wezterm.action.SendKey({ key = "d", mods = "ALT" }),
+	},
 	{
 		key = "LeftArrow",
 		mods = CURSOR_MOD,
