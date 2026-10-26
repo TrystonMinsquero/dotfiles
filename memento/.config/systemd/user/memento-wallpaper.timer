@@ -1,0 +1,10 @@
+[Unit]
+Description=Redraw the memento mori wallpaper daily (and at login)
+
+[Timer]
+OnCalendar=daily
+OnStartupSec=30s
+Persistent=true
+
+[Install]
+WantedBy=timers.target

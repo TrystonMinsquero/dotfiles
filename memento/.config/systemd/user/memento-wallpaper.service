@@ -1,0 +1,7 @@
+[Unit]
+Description=Redraw the memento mori wallpaper
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/memento-wallpaper.py
