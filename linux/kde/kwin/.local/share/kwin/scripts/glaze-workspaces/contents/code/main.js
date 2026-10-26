@@ -199,7 +199,18 @@ workspace.windowAdded.connect((w) => {
     cleanup();
 });
 
-workspace.windowRemoved.connect((w) => cleanup(w));
+// Closing the last window on this workspace goes back to the previous one
+// (or any workspace that still has windows), then the empty one is cleaned up.
+workspace.windowRemoved.connect((w) => {
+    const cur = workspace.currentDesktop;
+    if (managed(w) && w.desktops.some((d) => d.id === cur.id) && windowsOn(cur, w).length === 0) {
+        const alive = (d) => d && d.id !== cur.id && workspace.desktops.some((x) => x.id === d.id);
+        const back = alive(previousDesktop) ? previousDesktop
+            : workspace.desktops.find((d) => d.id !== cur.id && windowsOn(d, w).length > 0);
+        if (back) workspace.currentDesktop = back;
+    }
+    cleanup(w);
+});
 
 workspace.currentDesktopChanged.connect((prev) => {
     if (prev) previousDesktop = prev;
