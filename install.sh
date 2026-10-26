@@ -7,6 +7,13 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+# Git, on every OS
+echo "==> git"
+git config --global user.name >/dev/null || git config --global user.name "Tryston Minsquero"
+git config --global user.email >/dev/null || git config --global user.email "trystonminsquero@gmail.com"
+git config --global init.defaultBranch main
+git config --global submodule.recurse true
+
 case "$(uname -s)" in
     MINGW* | MSYS* | CYGWIN*) exec ./windows/install.sh ;;
 esac
@@ -24,10 +31,6 @@ stow -n -d common -t ~ --restow $PACKAGES 2>&1 |
         mv ~/"$target" ~/"$target.bak"
     done
 stow -d common -t ~ --restow $PACKAGES
-
-git config --global user.name >/dev/null || git config --global user.name "Tryston Minsquero"
-git config --global user.email >/dev/null || git config --global user.email "trystonminsquero@gmail.com"
-git config --global init.defaultBranch main
 
 if [ "$(uname -s)" = Linux ]; then
     ./linux/install.sh
