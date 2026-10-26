@@ -9,7 +9,7 @@
 ;; Caps Lock = Escape (in both base and plain); hold it 3 seconds = real Caps Lock.
 ;; Space held + h/j/k/l = arrows, , . = word left/right, Caps Lock = delete word,
 ;;   i/o = next/prev tab, q = close app (Alt+F4), w = Ctrl+W, n/m = page down/up,
-;;   g = Home, ; = End.
+;;   g = Home, ; = End, Enter = delete word forward (Ctrl+Del), / = find (Ctrl+F).
 ;;
 ;; Esc = Escape. Hold Esc 1 second = toggle between base and plain mode (a normal
 ;; keyboard, no home row mods). kanata-modes.py remembers the mode per app.
@@ -77,16 +77,16 @@
 (defsrc
   esc caps
   q w   i o
-  a s d f g   h j k l ;
-  n m , .
+  a s d f g   h j k l ; ret
+  n m , . /
   spc ralt rctl
 )
 
 (deflayer base
   @plain @caps
   q w   i o
-  @a @s @d @f g   h @j @k @l @;
-  n m , .
+  @a @s @d @f g   h @j @k @l @; ret
+  n m , . /
   @spc @prevws @quit
 )
 
@@ -94,15 +94,15 @@
 (deflayer nav
   _ C-bspc
   A-f4 C-w   C-tab C-S-tab
-  $pinky $ring $middle $index home   left down up right end
-  pgdn pgup C-left C-right
+  $pinky $ring $middle $index home   left down up right end C-del
+  pgdn pgup C-left C-right C-f
   _ _ _
 )
 
 (deflayer plain
   @to-hrm @caps
   q w   i o
-  a s d f g   h j k l ;
-  n m , .
+  a s d f g   h j k l ; ret
+  n m , . /
   spc @prevws @quit
 )
