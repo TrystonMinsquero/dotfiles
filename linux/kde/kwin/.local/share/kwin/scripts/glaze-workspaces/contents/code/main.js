@@ -186,8 +186,12 @@ function watch(w) {
     w.minimizedChanged.connect(() => { if (w.minimized) w.minimized = false; });
 }
 
+// Title bars hidden by default (Meta+Alt+; toggles one window's).
+const HIDE_TITLE_BARS = true;
+
 workspace.windowAdded.connect((w) => {
     if (!managed(w)) return;
+    if (HIDE_TITLE_BARS) w.noBorder = true;
     watch(w);
     place(w, true);
     const slot = SLOTS.find((s) => matches(w, s.match));
@@ -289,6 +293,19 @@ registerShortcut("Glaze: toggle expand", "Glaze: Toggle expanded window", "Meta+
 });
 workspace.windowRemoved.connect((w) => delete expanded[String(w.internalId)]);
 
+registerShortcut("Glaze: toggle title bar", "Glaze: Show/hide title bar", "Meta+Alt+;", () => {
+    const w = workspace.activeWindow;
+    if (w && w.normalWindow) w.noBorder = !w.noBorder;
+});
+
+// Switch to the previous window on this workspace; press again to switch back.
+registerShortcut("Glaze: other window", "Glaze: Switch to previous window", "Meta+Alt+.", () => {
+    const cur = workspace.currentDesktop, active = workspace.activeWindow;
+    const others = workspace.stackingOrder.filter((w) =>
+        w !== active && managed(w) && w.desktops.some((d) => d.id === cur.id));
+    if (others.length) workspace.activeWindow = others[others.length - 1];  // topmost
+});
+
 registerShortcut("Glaze: recent", "Glaze: Go to previous workspace", "Meta+Alt+,", () => {
     if (previousDesktop && workspace.desktops.some((d) => d.id === previousDesktop.id)) {
         workspace.currentDesktop = previousDesktop;
@@ -321,6 +338,7 @@ registerShortcut("Glaze: recent", "Glaze: Go to previous workspace", "Meta+Alt+,
     workspace.windowList().forEach((w) => {
         if (!managed(w)) return;
         if (w.minimized) w.minimized = false;
+        if (HIDE_TITLE_BARS) w.noBorder = true;
         watch(w);
         place(w, false);
     });
