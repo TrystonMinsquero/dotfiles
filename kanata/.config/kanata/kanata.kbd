@@ -7,7 +7,9 @@
 ;; Same-hand home row keys never decide (no misfires on rolls like "as"/"df"),
 ;; so same-hand mods still stack: hold a+s, then press a right-hand key.
 ;; Caps Lock = Escape (in both base and plain); hold it 3 seconds = real Caps Lock.
-;; Space held + h/j/k/l = arrows, , . = word left/right, Caps Lock = delete word.
+;; Space held + h/j/k/l = arrows, , . = word left/right, Caps Lock = delete word,
+;;   i/o = next/prev tab, q = close app (Alt+F4), w = Ctrl+W, n/m = page down/up,
+;;   g = Home, ; = End.
 ;;
 ;; Esc toggles between base and plain mode (a normal keyboard, no home row mods).
 ;;
@@ -66,29 +68,33 @@
 
 (defsrc
   esc caps
-  a s d f   h j k l ;
-  , .
+  q w   i o
+  a s d f g   h j k l ;
+  n m , .
   spc
 )
 
 (deflayer base
   @plain @caps
-  @a @s @d @f   h @j @k @l @;
-  , .
+  q w   i o
+  @a @s @d @f g   h @j @k @l @;
+  n m , .
   @spc
 )
 
 ;; Left home row is plain modifiers here so selection is instant (space+f+h = shift+left).
 (deflayer nav
   _ C-bspc
-  $pinky $ring $middle $index   left down up right _
-  C-left C-right
+  A-f4 C-w   C-tab C-S-tab
+  $pinky $ring $middle $index home   left down up right end
+  pgdn pgup C-left C-right
   _
 )
 
 (deflayer plain
   @to-hrm @caps
-  a s d f   h j k l ;
-  , .
+  q w   i o
+  a s d f g   h j k l ;
+  n m , .
   spc
 )
