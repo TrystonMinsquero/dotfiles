@@ -8,12 +8,16 @@
 The daemon talks to kanata over its local TCP port (kanata -p 127.0.0.1:5829):
   - you hold Esc to switch modes -> saved for the focused app + on-screen message
   - an app gets focus            -> its saved mode is restored (default: base)
+  - KDE's "disable touchpad while typing" is on in home-row mode and off in
+    plain mode (gaming); your own setting is put back when this stops
 
-Linux/KDE only, so it lives outside the dotfiles repo. Standard library only.
+Linux/KDE only. Standard library only.
 """
+import ast
 import json
 import os
 import select
+import signal
 import socket
 import subprocess
 import sys
@@ -29,6 +33,36 @@ def osd(text):
     subprocess.Popen(["qdbus6", "org.kde.plasmashell", "/org/kde/osdService",
                       "org.kde.osdService.showText", "input-keyboard", text],
                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def kwin_device(dev, prop):
+    out = subprocess.run(
+        ["gdbus", "call", "--session", "--dest", "org.kde.KWin",
+         "--object-path", "/org/kde/KWin/InputDevice" + (f"/{dev}" if dev else ""),
+         "--method", "org.freedesktop.DBus.Properties.Get",
+         "org.kde.KWin.InputDevice" + ("" if dev else "Manager"), prop],
+        capture_output=True, text=True).stdout.strip()
+    # gdbus prints e.g. (<'ASUP1208:00 Touchpad'>,) or (<true>,)
+    out = out[2:-3] if out.startswith("(<") else ""
+    return {"true": True, "false": False}.get(out, out.strip("'"))
+
+
+def touchpads():
+    try:
+        devs = ast.literal_eval(kwin_device(None, "devicesSysNames"))
+    except (ValueError, SyntaxError):
+        return []
+    return [d for d in devs if kwin_device(d, "touchpad") and kwin_device(d, "supportsDisableWhileTyping")]
+
+
+def set_typing_guard(on):
+    """KDE's "disable touchpad while typing", for every touchpad."""
+    for dev in touchpads():
+        subprocess.run(["gdbus", "call", "--session", "--dest", "org.kde.KWin",
+                        "--object-path", f"/org/kde/KWin/InputDevice/{dev}",
+                        "--method", "org.freedesktop.DBus.Properties.Set",
+                        "org.kde.KWin.InputDevice", "disableWhileTyping", f"<{str(on).lower()}>"],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 def label(mode, app):
@@ -71,7 +105,18 @@ def daemon():
         pass
     server = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
     server.bind(SOCK)
+
+    pads = touchpads()
+    original = kwin_device(pads[0], "disableWhileTyping") if pads else True
+
+    def stop(*_):
+        set_typing_guard(original)
+        sys.exit(0)
+    signal.signal(signal.SIGTERM, stop)
+    signal.signal(signal.SIGINT, stop)
+
     kanata = connect_kanata()
+    set_typing_guard(layer == "base")
     buf = b""
 
     def set_layer(name):
@@ -86,6 +131,7 @@ def daemon():
             if want != layer:
                 set_layer(want)
                 layer = want  # kanata echoes this back; it's ignored as a repeat
+                set_typing_guard(want == "base")
                 osd(label(want, app))
 
         if kanata in ready:
@@ -106,6 +152,7 @@ def daemon():
                 if new not in MODES or new == layer:
                     continue  # ignore nav (space held) and repeats
                 layer = new
+                set_typing_guard(new == "base")
                 if "CurrentLayerName" in msg:
                     continue  # just the starting state
                 if app:  # you held Esc: remember it for this app
