@@ -15,9 +15,6 @@ config.animation_fps = 1
 config.cursor_blink_rate = 500
 config.term = "xterm-256color" -- Set the terminal type
 
--- config.font = wezterm.font("Iosevka Custom")
-config.font = wezterm.font("Iosevka Term Medium")
--- config.font = wezterm.font("JetBrains Mono Regular")
 config.cell_width = 0.9
 
 local opacity = 0.75 -- Value is also used for toggling
@@ -558,8 +555,6 @@ config.window_frame = {
 	-- active_titlebar_bg = "#181616",
 }
 
--- config.window_decorations = "INTEGRATED_BUTTONS | RESIZE"
-config.window_decorations = "NONE | RESIZE"
 if wezterm.target_triple:find("windows") then
 	config.default_prog = { "powershell.exe", "-NoLogo" }
 	config.default_domain = "WSL:Ubuntu"
