@@ -13,7 +13,6 @@
 ;;
 ;; Esc = Escape. Hold Esc 1 second = toggle between base and plain mode (a normal
 ;; keyboard, no home row mods). kanata-modes.py remembers the mode per app.
-;; Both modes: Right Alt = previous workspace, hold Right Ctrl 0.5s = quit app.
 ;;
 ;; Panic exit: LCtrl + Space + Esc.
 
@@ -64,11 +63,6 @@
   plain (tap-hold 1000 1000 esc (layer-switch plain) (require-prior-idle 0))
   to-hrm (tap-hold 1000 1000 esc (layer-switch base) (require-prior-idle 0))
 
-  ;; Previous workspace (Meta+Alt+, in KWin and GlazeWM) and a quit that
-  ;; needs a 0.5s hold, so a stray tap in a game doesn't close it.
-  prevws M-A-,
-  quit (tap-hold 500 500 rctl A-f4 (require-prior-idle 0))
-
   ;; Tap = Escape (on release), hold 3s = Caps Lock.
   ;; Prior-idle off so the hold still works right after typing.
   caps (tap-hold 3000 3000 esc caps (require-prior-idle 0))
@@ -79,7 +73,7 @@
   q w   i o
   a s d f g   h j k l ; ret
   n m , . /
-  spc ralt rctl
+  spc
 )
 
 (deflayer base
@@ -87,7 +81,7 @@
   q w   i o
   @a @s @d @f g   h @j @k @l @; ret
   n m , . /
-  @spc @prevws @quit
+  @spc
 )
 
 ;; Left home row is plain modifiers here so selection is instant (space+f+h = shift+left).
@@ -96,7 +90,7 @@
   A-f4 C-w   C-tab C-S-tab
   $pinky $ring $middle $index home   left down up right end C-del
   pgdn pgup C-left C-right C-f
-  _ _ _
+  _
 )
 
 (deflayer plain
@@ -104,5 +98,5 @@
   q w   i o
   a s d f g   h j k l ; ret
   n m , . /
-  spc @prevws @quit
+  spc
 )
