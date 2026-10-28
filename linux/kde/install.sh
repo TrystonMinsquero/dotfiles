@@ -56,6 +56,9 @@ shortcut "KDE Keyboard Layout Switcher" "Switch to Next Keyboard Layout"        
 shortcut "KDE Keyboard Layout Switcher" "Switch to Last-Used Keyboard Layout"   # frees Meta+Alt+L (focus right)
 for dir in Up Down Left Right; do shortcut kwin "Switch Window $dir"; done      # Meta+Alt+arrows
 shortcut plasmashell cycle-panels 402653231                    # Meta+Alt+/ (Meta+Alt+. switches windows)
+shortcut kwin "Walk Through Windows" 150994945                 # Alt+Tab only; Meta+Tab = previous workspace
+shortcut plasmashell "manage activities"                       # frees Meta+Q
+shortcut kwin "Window Close" 150994995 268435537               # Alt+F4, Meta+Q
 
 echo "==> kde: panel"
 out=$(qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$(cat panel.js)")
