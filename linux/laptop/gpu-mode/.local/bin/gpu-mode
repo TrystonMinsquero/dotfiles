@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# gpu-mode Integrated|Hybrid
+# Offers to log out so supergfxctl can switch the NVIDIA GPU mode (KWin uses
+# the GPU, so the switch has to happen with no one logged in). KDE runs this
+# when it switches power profiles: Integrated on battery, Hybrid on AC.
+set -uo pipefail
+want=${1:-}
+case $want in
+    Integrated) msg="On battery. Log out to turn the NVIDIA GPU off." ;;
+    Hybrid) msg="Plugged in. Log out to turn the NVIDIA GPU back on." ;;
+    *) echo "usage: gpu-mode Integrated|Hybrid" >&2; exit 2 ;;
+esac
+
+on_ac() {
+    local s
+    for s in /sys/class/power_supply/*; do
+        [ "$(cat "$s/type")" = Mains ] && [ "$(cat "$s/online")" = 1 ] && return 0
+    done
+    return 1
+}
+# Not in that mode yet, and the power state still matches it
+still_wanted() {
+    [ "$(supergfxctl -g)" != "$want" ] || return 1
+    if [ "$want" = Hybrid ]; then on_ac; else ! on_ac; fi
+}
+
+still_wanted || exit 0
+action=$(notify-send -a GPU -i video-display -t 0 \
+    -A logout="Log out now" "NVIDIA GPU" "$msg")
+# The charger may have been plugged/unplugged while the notification was up
+[ "$action" = logout ] && still_wanted || exit 0
+supergfxctl -m "$want" && qdbus6 org.kde.Shutdown /Shutdown logout
