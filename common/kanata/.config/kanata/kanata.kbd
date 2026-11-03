@@ -9,7 +9,8 @@
 ;; Caps Lock = Escape (in both base and plain); hold it 3 seconds = real Caps Lock.
 ;; Space held + h/j/k/l = arrows, , . = word left/right, Caps Lock = delete word,
 ;;   i/o = next/prev tab, q = close app (Alt+F4), w = Ctrl+W, n/m = page down/up,
-;;   g = Home, ; = End, Enter = delete word forward (Ctrl+Del), / = find (Ctrl+F).
+;;   g = Home, ; = End, Enter = delete word forward (Ctrl+Del), / = find (Ctrl+F),
+;;   [ / ] = browser back/forward (Alt+Left/Right), a z x c v = Ctrl+A/Z/X/C/V.
 ;;
 ;; Esc = Escape. Hold Esc 1 second = toggle between base and plain mode (a normal
 ;; keyboard, no home row mods). kanata-modes.py remembers the mode per app.
@@ -70,33 +71,33 @@
 
 (defsrc
   esc caps
-  q w   i o
+  q w   i o   [ ]
   a s d f g   h j k l ; ret
-  n m , . /
+  z x c v   n m , . /
   spc
 )
 
 (deflayer base
   @plain @caps
-  q w   i o
+  q w   i o   [ ]
   @a @s @d @f g   h @j @k @l @; ret
-  n m , . /
+  z x c v   n m , . /
   @spc
 )
 
-;; Left home row is plain modifiers here so selection is instant (space+f+h = shift+left).
+;; s d f are plain modifiers here so selection is instant (space+f+h = shift+left).
 (deflayer nav
   _ C-bspc
-  A-f4 C-w   C-tab C-S-tab
-  $pinky $ring $middle $index home   left down up right end C-del
-  pgdn pgup C-left C-right C-f
+  A-f4 C-w   C-tab C-S-tab   A-left A-right
+  C-a $ring $middle $index home   left down up right end C-del
+  C-z C-x C-c C-v   pgdn pgup C-left C-right C-f
   _
 )
 
 (deflayer plain
   @to-hrm @caps
-  q w   i o
+  q w   i o   [ ]
   a s d f g   h j k l ; ret
-  n m , . /
+  z x c v   n m , . /
   spc
 )
