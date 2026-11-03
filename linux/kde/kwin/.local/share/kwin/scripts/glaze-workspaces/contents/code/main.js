@@ -264,12 +264,21 @@ function expandedRect(w) {
     };
 }
 
+function isExpanded(w) {
+    const want = expandedRect(w), g = w.frameGeometry;
+    return Math.abs(g.width - want.width) < 4 && Math.abs(g.height - want.height) < 4;
+}
+
+// Keeps the first saved geometry, so re-expanding a window that resized
+// itself still restores to where it was before.
 function expand(w) {
     const id = String(w.internalId);
     if (w.fullScreen) w.fullScreen = false;
     w.setMaximize(false, false);
-    const g = w.frameGeometry;
-    expanded[id] = { x: g.x, y: g.y, width: g.width, height: g.height };
+    if (!expanded[id]) {
+        const g = w.frameGeometry;
+        expanded[id] = { x: g.x, y: g.y, width: g.width, height: g.height };
+    }
     w.frameGeometry = expandedRect(w);
 }
 
@@ -280,13 +289,11 @@ function expandOnOpen(w) {
     expand(w);
     let tries = 0;
     const settle = () => {
-        const want = expandedRect(w), g = w.frameGeometry;
-        const fits = Math.abs(g.width - want.width) < 4 && Math.abs(g.height - want.height) < 4;
-        if (fits || ++tries > 3) {
+        if (isExpanded(w) || ++tries > 3) {
             w.frameGeometryChanged.disconnect(settle);
             return;
         }
-        w.frameGeometry = want;
+        w.frameGeometry = expandedRect(w);
     };
     w.frameGeometryChanged.connect(settle);
 }
@@ -295,7 +302,8 @@ registerShortcut("Glaze: toggle expand", "Glaze: Toggle expanded window", "Meta+
     const w = workspace.activeWindow;
     if (!w || !w.normalWindow) return;
     const id = String(w.internalId);
-    if (expanded[id]) {
+    // A window that resized itself out of the expanded size gets expanded again.
+    if (expanded[id] && isExpanded(w)) {
         w.frameGeometry = expanded[id];
         delete expanded[id];
         return;
@@ -317,11 +325,13 @@ registerShortcut("Glaze: other window", "Glaze: Switch to previous window", "Met
     if (others.length) workspace.activeWindow = others[others.length - 1];  // topmost
 });
 
-registerShortcut("Glaze: recent", "Glaze: Go to previous workspace", "Meta+Alt+,", () => {
+function showPrevious() {
     if (previousDesktop && workspace.desktops.some((d) => d.id === previousDesktop.id)) {
         workspace.currentDesktop = previousDesktop;
     }
-});
+}
+registerShortcut("Glaze: recent", "Glaze: Go to previous workspace", "Meta+Alt+,", showPrevious);
+registerShortcut("Glaze: recent (Meta+Tab)", "Glaze: Go to previous workspace (Meta+Tab)", "Meta+Tab", showPrevious);
 
 // Startup: adopt existing desktops by name, make sure keepAlive slots exist,
 // then sort every open window.
