@@ -1,0 +1,8 @@
+# CPU boost off on battery, on when plugged in. "add" sets it at boot.
+SUBSYSTEM!="power_supply", GOTO="ac_power_end"
+ATTR{type}!="Mains", GOTO="ac_power_end"
+
+ACTION=="add|change", ATTR{online}=="0", RUN+="/usr/local/bin/cpu-boost 0"
+ACTION=="add|change", ATTR{online}=="1", RUN+="/usr/local/bin/cpu-boost 1"
+
+LABEL="ac_power_end"
