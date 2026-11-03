@@ -11,6 +11,8 @@
 #   bat=      battery charge (%)
 #   batstate= Charging / Discharging / Full / Not charging
 #   batcharge= / batcurrent= remaining charge (uAh) and current draw (uA), for time left
+#   batfull=  full charge (uAh)
+#   batlimit= charge limit (%), 100 when there is none
 # Only reads /sys and /proc (plus one cheap nmcli call), so it never wakes the
 # NVIDIA GPU or triggers a Wi-Fi scan.
 
@@ -50,5 +52,7 @@ for b in /sys/class/power_supply/BAT*; do
     echo "batstate=$(cat "$b/status")"
     echo "batcharge=$(cat "$b/charge_now" 2>/dev/null)"
     echo "batcurrent=$(cat "$b/current_now" 2>/dev/null)"
+    echo "batfull=$(cat "$b/charge_full" 2>/dev/null)"
+    echo "batlimit=$(cat "$b/charge_control_end_threshold" 2>/dev/null || echo 100)"
     break
 done

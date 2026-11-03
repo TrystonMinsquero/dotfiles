@@ -30,7 +30,9 @@ PlasmoidItem {
     property string batState: ""    // Charging / Discharging / Full / Not charging
     property string net: "full"     // NetworkManager connectivity
     property real batCharge: 0      // uAh left
-    property real batDraw: 0        // uA, smoothed while discharging (0 = unknown)
+    property real batFull: 0        // uAh when full
+    property int batLimit: 100      // charge limit (%)
+    property real batDraw: 0        // uA, smoothed while charging/discharging (0 = unknown)
 
     // Only show Wi-Fi when something is wrong. "" = all good, so it's hidden.
     readonly property string netProblem:
@@ -40,10 +42,15 @@ PlasmoidItem {
         : wifi && signal < 40 ? signal + "%"
         : ""
 
-    // Battery time left while discharging, Go-style: 3h12m / 45m
+    // Battery time until empty while discharging, or until the charge limit
+    // while charging. Go-style: 3h12m / 45m
     readonly property string timeLeft: {
-        if (batState !== "Discharging" || batDraw <= 0) return "";
-        const mins = Math.round(batCharge / batDraw * 60);
+        if (batDraw <= 0) return "";
+        const remaining = batState === "Discharging" ? batCharge
+            : batState === "Charging" ? batFull * batLimit / 100 - batCharge
+            : 0;
+        if (remaining <= 0) return "";
+        const mins = Math.round(remaining / batDraw * 60);
         const h = Math.floor(mins / 60), m = mins % 60;
         return h > 0 ? h + "h" + m + "m" : m + "m";
     }
@@ -97,13 +104,19 @@ PlasmoidItem {
             root.wifi = v.wifi || "";
             root.signal = parseInt(v.signal) || 0;
             root.battery = v.bat !== undefined ? parseInt(v.bat) : -1;
+            const prevState = root.batState;
             root.batState = v.batstate || "";
             root.net = v.net || "unknown";
             root.batCharge = parseInt(v.batcharge) || 0;
+            root.batFull = parseInt(v.batfull) || 0;
+            root.batLimit = parseInt(v.batlimit) || 100;
             // Current jumps around; smooth it so the estimate doesn't flicker.
+            // Start over when switching between charging and discharging.
             const draw = parseInt(v.batcurrent) || 0;
-            root.batDraw = root.batState !== "Discharging" || draw <= 0 ? 0
-                : root.batDraw > 0 ? root.batDraw * 0.8 + draw * 0.2 : draw;
+            const moving = root.batState === "Charging" || root.batState === "Discharging";
+            root.batDraw = !moving || draw <= 0 ? 0
+                : root.batDraw > 0 && root.batState === prevState ? root.batDraw * 0.8 + draw * 0.2
+                : draw;
         }
     }
 
@@ -114,7 +127,7 @@ PlasmoidItem {
         + "\nNVIDIA GPU: " + gpu + "\nCPU: " + cpuTemp + " °C"
         + "\nWi-Fi: " + (wifi ? wifi + " (" + signal + "%)" : "disconnected")
         + "\nBattery: " + battery + "% (" + batState.toLowerCase() + ")"
-        + (timeLeft ? ", " + timeLeft + " left" : "")
+        + (timeLeft ? ", " + timeLeft + (batState === "Charging" ? " to " + batLimit + "%" : " left") : "")
 
     component Stat: Row {
         property string label
