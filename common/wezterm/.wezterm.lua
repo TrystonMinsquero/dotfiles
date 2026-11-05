@@ -66,7 +66,7 @@ local function basename(s)
 	return string.gsub(s, "(.*[/\\])(.*)", "%2")
 end
 
----@param path string file path to expand 
+---@param path string file path to expand
 ---@param home_path string? home path to expand ~
 ---@param cwd string? current working directory to always convert to absolute path
 ---@return string
@@ -156,6 +156,257 @@ local function find_other_pane(pane)
 		end
 	end
 	return nil
+end
+
+local function toast(window, msg)
+	wezterm.log_warn(msg) -- also in the debug overlay/log, in case notifications are off
+	window:toast_notification("WezTerm", msg, nil, 4000)
+end
+
+-- Foreground programs we can safely type a command into
+local SHELLS = { [""] = true, zsh = true, bash = true, fish = true, sh = true, nu = true }
+
+---A pane in this tab that's idle at a shell prompt: the current pane if it is, else another.
+---@param pane Pane
+---@return Pane?
+local function find_shell_pane(pane)
+	if SHELLS[pane_prog(pane)] then
+		return pane
+	end
+	for _, p in ipairs(pane:tab():panes()) do
+		if p:pane_id() ~= pane:pane_id() and SHELLS[pane_prog(p)] then
+			return p
+		end
+	end
+	return nil
+end
+
+---Single-quote a string for POSIX shells
+local function shell_quote(s)
+	return "'" .. s:gsub("'", "'\\''") .. "'"
+end
+
+---Open file_path at line_num in an nvim pane of this tab. If there is none, start nvim
+---in a pane that's idle at a shell (current one first), otherwise in a new split.
+---@param window Window
+---@param pane Pane
+---@param file_path string absolute path
+---@param line_num number|string|nil
+local function open_in_nvim(window, pane, file_path, line_num)
+	line_num = math.max(tonumber(line_num) or 1, 1)
+	local nvim_pane = find_pane_using(pane, "nvim")
+	if nvim_pane then
+		if nvim_pane:pane_id() ~= pane:pane_id() then
+			nvim_pane:activate()
+		end
+		local cmd = ":e +" .. line_num .. " " .. file_path:gsub("([ %%#|\\])", "\\%1")
+		wezterm.log_info("Ran nvim cmd |", cmd)
+		nvim_pane:send_text("\x1b" .. cmd .. "\r")
+		return
+	end
+
+	local cmd = "nvim +" .. line_num .. " " .. shell_quote(file_path)
+	local shell_pane = find_shell_pane(pane)
+	if shell_pane then
+		wezterm.log_info("Ran cmd in pane", shell_pane:pane_id(), "|", cmd)
+		shell_pane:activate()
+		shell_pane:send_text("\x15" .. cmd .. "\r") -- ctrl+u clears the prompt first
+	else
+		-- e.g. Claude Code / another TUI is in the foreground: don't type into it
+		wezterm.log_info("Split with cmd |", cmd)
+		pane:split({
+			direction = "Right",
+			args = { os.getenv("SHELL") or "sh", "-lc", cmd },
+		})
+	end
+end
+
+-- Marker that tools (e.g. Claude Code) put in front of things to open with CTRL|ALT+e
+local OPEN_PREFIX = "⟫"
+
+---Figure out what `text` is and open it: URLs go to the browser, anything else is
+---treated as `path[:line[:col]]` and opened in nvim.
+---@param window Window
+---@param pane Pane
+---@param text string
+local function open_target(window, pane, text)
+	local raw = text
+	if text:sub(1, #OPEN_PREFIX) == OPEN_PREFIX then
+		text = text:sub(#OPEN_PREFIX + 1)
+	end
+	-- Trim whitespace and surrounding quotes/brackets/punctuation
+	text = text:gsub("^%s+", ""):gsub("^[`'\"%(%[<]+", ""):gsub("[`'\"%)%]>%.,;:!?]+$", "")
+
+	if text:match("^%a[%w+.-]*://") and not text:match("^file://") then
+		wezterm.log_info("opening url: " .. text)
+		wezterm.open_with(text)
+		return
+	end
+
+	text = text:gsub("^file://", "")
+	local file_path, line_num = text:match("^(.-):(%d+):%d+$")
+	if not file_path then
+		file_path, line_num = text:match("^(.-):(%d+)$")
+	end
+	file_path = file_path or text
+	if file_path == "" then
+		toast(window, "Nothing to open in:\n" .. raw)
+		return
+	end
+
+	local cwdUrl = pane:get_current_working_dir()
+	file_path = canonicalizePath(file_path, wezterm.home_dir, cwdUrl and cwdUrl.file_path)
+	local f = io.open(file_path, "r")
+	if not f then
+		toast(window, "File not found:\n" .. file_path)
+		return
+	end
+	f:close()
+	open_in_nvim(window, pane, file_path, line_num)
+end
+
+-- Closing marker. Lets a target survive being hard-wrapped by TUIs like Claude Code,
+-- which insert real newlines + indentation instead of letting the terminal soft-wrap.
+local OPEN_SUFFIX = "⟪"
+-- How many lines of scrollback CTRL|ALT+e scans
+local SCAN_LINES = 2000
+-- Most lines a ⟫ ... ⟪ target may wrap onto. A ⟪ further away than this belongs to
+-- something else, so the ⟫ is treated as unterminated (stops at end of line/word).
+local MAX_TARGET_LINES = 4
+
+---Turn the text between the markers into {kind, value}, undoing line wrapping.
+---  `$ cmd`        -> cmd  (wrapped pieces joined with a space, since TUIs wrap at spaces)
+---  `scheme://...` -> url  (pieces joined with nothing)
+---  anything else  -> file (pieces joined with nothing)
+---@param body string
+---@return {kind: string, value: string}?
+local function parse_target(body)
+	local pieces = {}
+	for line in body:gmatch("[^\n]+") do
+		line = line:gsub("^%s+", ""):gsub("%s+$", "")
+		if line ~= "" then
+			table.insert(pieces, line)
+		end
+	end
+	if #pieces == 0 then
+		return nil
+	end
+	local first = pieces[1]:gsub("^`+", "")
+	pieces[1] = first
+	if first:sub(1, 1) == "$" then
+		pieces[1] = first:sub(2)
+		local cmd = table.concat(pieces, " "):gsub("^%s+", ""):gsub("[%s`]+$", "")
+		return cmd ~= "" and { kind = "cmd", value = cmd } or nil
+	end
+	local value = table.concat(pieces, ""):gsub("^[`'\"%(%[<]+", ""):gsub("[`'\"%)%]>%.,;:!?]+$", "")
+	return { kind = value:match("^%a[%w+.-]*://") and "url" or "file", value = value }
+end
+
+local function trim(s)
+	return (s:gsub("^%s+", ""):gsub("%s+$", ""))
+end
+
+---Find every ⟫ ... ⟪ target in the pane's scrollback, newest first.
+---A ⟫ with no ⟪ before the next ⟫ just runs to the end of its line.
+---Each target also gets `fragment`: the text QuickSelect would have matched on its
+---first line, used to map a QuickSelect pick back to the full (possibly wrapped) target.
+---@param pane Pane
+local function collect_targets(pane)
+	local text = pane:get_logical_lines_as_text(SCAN_LINES)
+	local found = {}
+	local pos = 1
+	while true do
+		local s, e = text:find(OPEN_PREFIX, pos, true)
+		if not e then
+			break
+		end
+		local next_open = text:find(OPEN_PREFIX, e + 1, true)
+		local close = text:find(OPEN_SUFFIX, e + 1, true)
+		local line_end = text:find("\n", e + 1, true) or #text + 1
+		local frag_end = math.min(line_end, next_open or #text + 1) - 1
+		if close and close < line_end and (not next_open or close < next_open) then
+			frag_end = close + #OPEN_SUFFIX - 1
+		end
+		local fragment = trim(text:sub(s, frag_end))
+		local body
+		if
+			close
+			and (not next_open or close < next_open)
+			and select(2, text:sub(e + 1, close - 1):gsub("\n", "")) < MAX_TARGET_LINES
+		then
+			body = text:sub(e + 1, close - 1)
+			pos = close + #OPEN_SUFFIX
+		else
+			-- Unterminated: a `$ cmd` takes the rest of the line, a url/file the next word
+			body = text:sub(e + 1, (next_open or #text + 1) - 1):match("^[^\n]*")
+			if not body:match("^%s*`?%$") then
+				body = body:match("^%s*(%S*)")
+			end
+			pos = e + 1
+		end
+		local target = parse_target(body)
+		if target then
+			target.fragment = fragment
+			table.insert(found, 1, target)
+		end
+	end
+	return found
+end
+
+---Type cmd into a shell pane in this tab (the current one if it's a shell, else another,
+---else a new split), and copy it to the clipboard.
+---@param window Window
+---@param pane Pane
+---@param cmd string
+---@param run boolean? also press Enter
+local function run_command(window, pane, cmd, run)
+	window:copy_to_clipboard(cmd, "Clipboard")
+	local target = find_shell_pane(pane)
+	local text = cmd .. (run and "\r" or "")
+	wezterm.log_info(run and "Running cmd |" or "Sending cmd |", cmd)
+	if target then
+		target:send_text("\x15" .. text) -- ctrl+u clears the prompt first
+	else
+		local cwdUrl = pane:get_current_working_dir()
+		target = pane:split({ direction = "Bottom", cwd = cwdUrl and cwdUrl.file_path })
+		target:send_text(text)
+	end
+	-- Typed only: focus the shell so you can edit/confirm. Run: stay where you were.
+	if run then
+		pane:activate()
+	else
+		target:activate()
+	end
+end
+
+---QuickSelect a ⟫ target and open it. QuickSelect only matches within a line, so it
+---labels the first line of a target; the full target is recovered from scrollback.
+---@param run boolean press Enter after typing a `$ cmd` target
+local function smart_open(run)
+	return act.QuickSelectArgs({
+		label = run and "open/run" or "open",
+		patterns = { OPEN_PREFIX .. "[^" .. OPEN_PREFIX .. OPEN_SUFFIX .. "\\n]*" .. OPEN_SUFFIX .. "?" },
+		action = wezterm.action_callback(function(window, pane)
+			local selection = trim(window:get_selection_text_for_pane(pane))
+			local target
+			for _, t in ipairs(collect_targets(pane)) do -- newest first
+				if t.fragment == selection then
+					target = t
+					break
+				end
+			end
+			if not target then -- fall back to just what was selected
+				target = parse_target((selection:sub(#OPEN_PREFIX + 1):gsub(OPEN_SUFFIX .. "$", "")))
+			end
+			if not target then
+				toast(window, "Nothing to open in:\n" .. selection)
+			elseif target.kind == "cmd" then
+				run_command(window, pane, target.value, run)
+			else
+				open_target(window, pane, target.value)
+			end
+		end),
+	})
 end
 
 config.keys = { -- Navigate Splits
@@ -317,8 +568,8 @@ config.keys = { -- Navigate Splits
 	{ key = "PageDown", action = act.DisableDefaultAssignment },
 	{ key = "PageUp", action = act.ScrollByPage(-0.5) },
 	{ key = "PageDown", action = act.ScrollByPage(0.5) },
-	{ key = "u", mods="CTRL|ALT", action = act.ScrollByPage(-0.5) },
-	{ key = "d", mods="CTRL|ALT", action = act.ScrollByPage(0.5) },
+	{ key = "u", mods = "CTRL|ALT", action = act.ScrollByPage(-0.5) },
+	{ key = "d", mods = "CTRL|ALT", action = act.ScrollByPage(0.5) },
 	{ key = "PageUp", mods = "SHIFT", action = act.ScrollByPage(-1.0) },
 	{ key = "PageDown", mods = "SHIFT", action = act.ScrollByPage(1.0) },
 	-- Copy Mode
@@ -346,68 +597,15 @@ config.keys = { -- Navigate Splits
 			patterns = {
 				[=[[a-zA-Z0-9_.\/~-]+:\d+]=],
 			},
-			-- Note the parameters: window, pane, id, label
 			action = wezterm.action_callback(function(window, pane)
-				local selection = window:get_selection_text_for_pane(pane)
-				local file_path, line_num = selection:match("([^:]+):(%d+)")
-				if not (file_path and line_num) then
-					wezterm.log_error("file_path:", file_path, "| line_num:", line_num, " are not valid")
-					window:toast_notification(
-						"WezTerm Error",
-						string.format("selection not found:\n%s", selection),
-						nil, -- No icon
-						4000 -- Duration in milliseconds (4 seconds)
-					)
-					return
-				end
-
-				local function starts_with(src, prefix)
-					return src:sub(1, #prefix) == prefix
-				end
-				local function make_relative(target, base)
-					-- Ensure trailing slash on base path for clean splitting
-					if not base:match("/$") then
-						base = base .. "/"
-					end
-					-- If target starts with base, strip it off
-					if target:find(base, 1, true) == 1 then
-						return target:sub(#base + 1)
-					end
-					return target -- fallback if no common prefix
-				end
-
-				-- Try make path abosolute
-				local cwdUrl = pane:get_current_working_dir()
-				local cwd = cwdUrl and cwdUrl.file_path
-				file_path = canonicalizePath(file_path, wezterm.home_dir, cwd)
-				wezterm.log_info(file_path)
-				-- end
-
-				line_num = math.max(tonumber(line_num), 1)
-				local nvim_pane = find_pane_using(pane, "nvim")
-				if nvim_pane == nil then -- Open Nvim in current pane
-					window:perform_action(act.SendKey({ key = "u", mods = "CTRL" }), pane)
-					local text = "nvim +" .. line_num .. " " .. file_path
-					wezterm.log_info("Ran cmd |", text)
-					for char in text:gmatch(".") do
-						window:perform_action(act.SendKey({ key = char }), pane)
-					end
-					window:perform_action(act.SendKey({ key = "Enter" }), pane)
-				else -- Open file in current nvim pane
-					if nvim_pane ~= pane then
-						nvim_pane:activate()
-					end
-					window:perform_action(act.SendKey({ key = "Escape" }), nvim_pane)
-					local cmd = ":e +" .. line_num .. " " .. file_path
-					wezterm.log_info("Ran nvim cmd |", cmd)
-					for char in cmd:gmatch(".") do
-						window:perform_action(act.SendKey({ key = char }), nvim_pane)
-					end
-					window:perform_action(act.SendKey({ key = "Enter" }), nvim_pane)
-				end
+				open_target(window, pane, window:get_selection_text_for_pane(pane))
 			end),
 		}),
 	},
+	-- Smart open: pick a `⟫ target ⟪` from scrollback (URL -> browser, path[:line] -> nvim, $ cmd -> shell)
+	{ key = "e", mods = "CTRL|ALT", action = smart_open(false) },
+	-- Same, but `$ cmd` targets are run (Enter pressed) instead of just typed
+	{ key = "e", mods = "CTRL|ALT|SHIFT", action = smart_open(true) },
 	{ key = "g", mods = "CTRL", action = act.OpenLinkAtMouseCursor },
 	-- Find
 	{ key = "/", mods = "CTRL|ALT", action = act.Search("CurrentSelectionOrEmptyString") },
