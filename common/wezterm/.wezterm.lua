@@ -44,6 +44,9 @@ config.use_fancy_tab_bar = true
 -- This is where you actually apply your config choices
 --
 
+-- Modifiers for all the custom keybinds below
+local MOD = "CTRL|ALT"
+local MOD_EXTRA = MOD .. "|SHIFT"
 local CURSOR_MOD = wezterm.target_triple:find("apple") and "ALT" or "CTRL"
 
 -- Makes it convenient for window managers
@@ -221,7 +224,7 @@ local function open_in_nvim(window, pane, file_path, line_num)
 	end
 end
 
--- Marker that tools (e.g. Claude Code) put in front of things to open with CTRL|ALT+e
+-- Marker that tools (e.g. Claude Code) put in front of things to open with MOD+e
 local OPEN_PREFIX = "⟫"
 
 ---Figure out what `text` is and open it: URLs go to the browser, anything else is
@@ -268,7 +271,7 @@ end
 -- Closing marker. Lets a target survive being hard-wrapped by TUIs like Claude Code,
 -- which insert real newlines + indentation instead of letting the terminal soft-wrap.
 local OPEN_SUFFIX = "⟪"
--- How many lines of scrollback CTRL|ALT+e scans
+-- How many lines of scrollback MOD+e scans
 local SCAN_LINES = 2000
 -- Most lines a ⟫ ... ⟪ target may wrap onto. A ⟪ further away than this belongs to
 -- something else, so the ⟫ is treated as unterminated (stops at end of line/word).
@@ -412,56 +415,56 @@ end
 config.keys = { -- Navigate Splits
 	{
 		key = "h",
-		mods = "CTRL|ALT",
+		mods = MOD,
 		action = act.ActivatePaneDirection("Left"),
 	},
 	{
 		key = "j",
-		mods = "CTRL|ALT",
+		mods = MOD,
 		action = act.ActivatePaneDirection("Down"),
 	},
 	{
 		key = "k",
-		mods = "CTRL|ALT",
+		mods = MOD,
 		action = act.ActivatePaneDirection("Up"),
 	},
 	{
 		key = "l",
-		mods = "CTRL|ALT",
+		mods = MOD,
 		action = act.ActivatePaneDirection("Right"),
 	},
 	-- Adjust Split Sizes
 	{
 		key = "h",
-		mods = "CTRL|ALT|SHIFT",
+		mods = MOD_EXTRA,
 		action = act.AdjustPaneSize({ "Left", 5 }),
 	},
 	{
 		key = "j",
-		mods = "CTRL|ALT|SHIFT",
+		mods = MOD_EXTRA,
 		action = act.AdjustPaneSize({ "Down", 5 }),
 	},
 	{
 		key = "k",
-		mods = "CTRL|ALT|SHIFT",
+		mods = MOD_EXTRA,
 		action = act.AdjustPaneSize({ "Up", 5 }),
 	},
 	{
 		key = "l",
-		mods = "CTRL|ALT|SHIFT",
+		mods = MOD_EXTRA,
 		action = act.AdjustPaneSize({ "Right", 5 }),
 	},
 	-- Workspace Management
 	{
 		key = "s",
-		mods = "CTRL|ALT|SHIFT",
+		mods = MOD_EXTRA,
 		action = act.ShowLauncherArgs({
 			flags = "FUZZY|WORKSPACES",
 		}),
 	},
 	{
 		key = "c",
-		mods = "CTRL|ALT",
+		mods = MOD,
 		action = act.PromptInputLine({
 			description = wezterm.format({
 				{ Attribute = { Intensity = "Bold" } },
@@ -486,7 +489,7 @@ config.keys = { -- Navigate Splits
 	-- Pane Management
 	{
 		key = "|",
-		mods = "CTRL|ALT",
+		mods = MOD,
 		action = act.SplitPane({
 			direction = "Right",
 			size = { Percent = 50 },
@@ -494,7 +497,7 @@ config.keys = { -- Navigate Splits
 	},
 	{
 		key = "s",
-		mods = "CTRL|ALT",
+		mods = MOD,
 		action = act.SplitPane({
 			direction = "Down",
 			size = { Percent = 50 },
@@ -502,7 +505,7 @@ config.keys = { -- Navigate Splits
 	},
 	{
 		key = "v",
-		mods = "CTRL|ALT",
+		mods = MOD,
 		action = act.SplitPane({
 			direction = "Right",
 			size = { Percent = 50 },
@@ -510,38 +513,38 @@ config.keys = { -- Navigate Splits
 	},
 	{
 		key = "w",
-		mods = "CTRL|ALT",
+		mods = MOD,
 		action = act.CloseCurrentPane({ confirm = true }),
 	},
 	-- Tab Management
 	{
 		key = "N",
-		mods = "CTRL|ALT",
+		mods = MOD,
 		action = act.DisableDefaultAssignment,
 	},
 	{
 		key = "t",
-		mods = "CTRL|ALT",
+		mods = MOD,
 		action = act.SpawnTab("CurrentPaneDomain"),
 	},
-	{ key = "0", mods = "CTRL|ALT", action = act.ActivateTab(-1) },
-	{ key = "1", mods = "CTRL|ALT", action = act.ActivateTab(0) },
-	{ key = "2", mods = "CTRL|ALT", action = act.ActivateTab(1) },
-	{ key = "3", mods = "CTRL|ALT", action = act.ActivateTab(2) },
-	{ key = "4", mods = "CTRL|ALT", action = act.ActivateTab(3) },
-	{ key = "5", mods = "CTRL|ALT", action = act.ActivateTab(4) },
-	{ key = "6", mods = "CTRL|ALT", action = act.ActivateTab(5) },
-	{ key = "7", mods = "CTRL|ALT", action = act.ActivateTab(6) },
-	{ key = "8", mods = "CTRL|ALT", action = act.ActivateTab(7) },
-	{ key = "9", mods = "CTRL|ALT", action = act.ActivateTab(8) },
+	{ key = "0", mods = MOD, action = act.ActivateTab(-1) },
+	{ key = "1", mods = MOD, action = act.ActivateTab(0) },
+	{ key = "2", mods = MOD, action = act.ActivateTab(1) },
+	{ key = "3", mods = MOD, action = act.ActivateTab(2) },
+	{ key = "4", mods = MOD, action = act.ActivateTab(3) },
+	{ key = "5", mods = MOD, action = act.ActivateTab(4) },
+	{ key = "6", mods = MOD, action = act.ActivateTab(5) },
+	{ key = "7", mods = MOD, action = act.ActivateTab(6) },
+	{ key = "8", mods = MOD, action = act.ActivateTab(7) },
+	{ key = "9", mods = MOD, action = act.ActivateTab(8) },
 	{
 		key = "p",
-		mods = "CTRL|ALT",
+		mods = MOD,
 		action = act.ActivateCommandPalette,
 	},
 	{ -- Rename Current Tab
 		key = ",",
-		mods = "CTRL|ALT",
+		mods = MOD,
 		action = act.PromptInputLine({
 			description = wezterm.format({
 				{ Attribute = { Intensity = "Bold" } },
@@ -560,7 +563,7 @@ config.keys = { -- Navigate Splits
 	},
 	{
 		key = "q",
-		mods = "CTRL|ALT|SHIFT",
+		mods = MOD_EXTRA,
 		action = act.QuitApplication,
 	},
 	-- Scroll
@@ -568,15 +571,15 @@ config.keys = { -- Navigate Splits
 	{ key = "PageDown", action = act.DisableDefaultAssignment },
 	{ key = "PageUp", action = act.ScrollByPage(-0.5) },
 	{ key = "PageDown", action = act.ScrollByPage(0.5) },
-	{ key = "u", mods = "CTRL|ALT", action = act.ScrollByPage(-0.5) },
-	{ key = "d", mods = "CTRL|ALT", action = act.ScrollByPage(0.5) },
+	{ key = "u", mods = MOD, action = act.ScrollByPage(-0.5) },
+	{ key = "d", mods = MOD, action = act.ScrollByPage(0.5) },
 	{ key = "PageUp", mods = "SHIFT", action = act.ScrollByPage(-1.0) },
 	{ key = "PageDown", mods = "SHIFT", action = act.ScrollByPage(1.0) },
 	-- Copy Mode
-	{ key = "y", mods = "CTRL|ALT", action = act.ActivateCopyMode },
+	{ key = "y", mods = MOD, action = act.ActivateCopyMode },
 	{
 		key = "g",
-		mods = "CTRL|ALT",
+		mods = MOD,
 		action = wezterm.action.QuickSelectArgs({
 			label = "open url",
 			patterns = {
@@ -591,7 +594,7 @@ config.keys = { -- Navigate Splits
 	},
 	{
 		key = "f",
-		mods = "CTRL|ALT",
+		mods = MOD,
 		action = act.QuickSelectArgs({
 			label = "open file",
 			patterns = {
@@ -603,15 +606,15 @@ config.keys = { -- Navigate Splits
 		}),
 	},
 	-- Smart open: pick a `⟫ target ⟪` from scrollback (URL -> browser, path[:line] -> nvim, $ cmd -> shell)
-	{ key = "e", mods = "CTRL|ALT", action = smart_open(false) },
+	{ key = "e", mods = MOD, action = smart_open(false) },
 	-- Same, but `$ cmd` targets are run (Enter pressed) instead of just typed
-	{ key = "e", mods = "CTRL|ALT|SHIFT", action = smart_open(true) },
+	{ key = "e", mods = MOD_EXTRA, action = smart_open(true) },
 	{ key = "g", mods = "CTRL", action = act.OpenLinkAtMouseCursor },
 	-- Find
-	{ key = "/", mods = "CTRL|ALT", action = act.Search("CurrentSelectionOrEmptyString") },
+	{ key = "/", mods = MOD, action = act.Search("CurrentSelectionOrEmptyString") },
 	{
 		key = "o",
-		mods = "CTRL|ALT",
+		mods = MOD,
 		-- toggling opacity
 		action = wezterm.action_callback(function(window, _)
 			local overrides = window:get_config_overrides() or {}
@@ -625,7 +628,7 @@ config.keys = { -- Navigate Splits
 	},
 	{
 		key = "o",
-		mods = "CTRL|ALT|SHIFT",
+		mods = MOD_EXTRA,
 		-- toggling opacity
 		action = wezterm.action_callback(function(window, _)
 			local overrides = window:get_config_overrides() or {}
@@ -636,7 +639,7 @@ config.keys = { -- Navigate Splits
 	},
 	{
 		key = "i",
-		mods = "CTRL|ALT|SHIFT",
+		mods = MOD_EXTRA,
 		-- toggling opacity
 		action = wezterm.action_callback(function(window, _)
 			local overrides = window:get_config_overrides() or {}
@@ -671,7 +674,7 @@ config.keys = { -- Navigate Splits
 	},
 	{
 		key = "r",
-		mods = "CTRL|ALT|SHIFT",
+		mods = MOD_EXTRA,
 		action = wezterm.action_callback(function(win, pane)
 			local other_pane = find_other_pane(pane)
 			if other_pane then
@@ -683,7 +686,7 @@ config.keys = { -- Navigate Splits
 	},
 	{
 		key = "r",
-		mods = "CTRL|ALT",
+		mods = MOD,
 		action = wezterm.action_callback(function(win, pane)
 			local other_pane = find_other_pane(pane)
 			if other_pane then
@@ -699,7 +702,7 @@ if wezterm.gui then
 	-- local copy_mode = wezterm.gui.default_key_tables().copy_mode
 	-- local copy_mode_extensions = {
 	-- 	{ key = "g", mods = "CTRL", action = "OpenLinkAtMouseCursor" },
-	-- 	{ key = "g", mods = "CTRL|ALT", action = "OpenLinkAtMouseCursor" },
+	-- 	{ key = "g", mods = MOD, action = "OpenLinkAtMouseCursor" },
 	-- }
 	-- for _, key_bind in ipairs(copy_mode_extensions) do
 	-- 	table.insert(copy_mode, key_bind)
