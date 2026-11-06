@@ -4,6 +4,8 @@
 #   KDE:   Power Saver on battery, screen at 60 Hz on battery / max Hz on AC
 #   gpu-mode/  log-out prompt to turn the NVIDIA GPU off on battery and back
 #              on on AC (stowed, when supergfxctl exists)
+#   claude-awake/  no sleep while a Claude Code session is working (stowed,
+#              plus hooks in ~/.claude/settings.json)
 #   asus/  ASUS-only power and hardware settings (sudo), when asusctl exists
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -51,6 +53,17 @@ for o in json.load(sys.stdin)["outputs"]:
     KW --group AC --group RunScript --key ProfileLoadCommand "$(join "${ac_cmds[@]}")"
     qdbus6 org.kde.Solid.PowerManagement /org/kde/Solid/PowerManagement \
         org.kde.Solid.PowerManagement.reparseConfiguration >/dev/null 2>&1 || true
+fi
+
+if command -v kde-inhibit >/dev/null && command -v jq >/dev/null; then
+    echo "==> laptop: no sleep while Claude Code is working"
+    stow -d . -t ~ --no-folding --restow claude-awake
+    settings=~/.claude/settings.json
+    mkdir -p ~/.claude
+    [ -f "$settings" ] || echo '{}' >"$settings"
+    tmp=$(mktemp)
+    jq --arg cmd "$HOME/.local/bin/claude-awake" -f claude-awake-hooks.jq "$settings" >"$tmp" \
+        && mv "$tmp" "$settings"
 fi
 
 if command -v asusctl >/dev/null; then

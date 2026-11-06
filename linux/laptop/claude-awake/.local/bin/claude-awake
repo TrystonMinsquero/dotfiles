@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# claude-awake start|stop  (Claude Code hook; reads the hook's JSON on stdin)
+# Keeps the laptop from going to sleep while a Claude Code session is working.
+# The screen can still dim and turn off. One lock per session; the lock also
+# goes away if that Claude process exits.
+set -uo pipefail
+action=${1:-}
+sid=$(jq -r '.session_id // empty')
+[ -n "$sid" ] || exit 0
+
+dir=${XDG_RUNTIME_DIR:-/tmp}/claude-awake
+mkdir -p "$dir"
+lock=$dir/$sid
+
+held() { [ -f "$lock" ] && kill -0 "$(cat "$lock")" 2>/dev/null; }
+
+case $action in
+start)
+    held && exit 0
+    # Claude writes ~/.claude/sessions/<pid>.json for each running instance
+    cpid=
+    for f in ~/.claude/sessions/*.json; do
+        if [ "$(jq -r '.sessionId // empty' "$f" 2>/dev/null)" = "$sid" ]; then
+            cpid=$(basename "$f" .json)
+            break
+        fi
+    done
+    if [ -n "$cpid" ]; then
+        wait_cmd=(tail --pid="$cpid" -f /dev/null)
+    else
+        wait_cmd=(sleep 4h)
+    fi
+    # Own process group, so stop can end kde-inhibit and its child together
+    setsid kde-inhibit --power "${wait_cmd[@]}" </dev/null >/dev/null 2>&1 &
+    echo $! >"$lock"
+    ;;
+stop)
+    held && kill -- -"$(cat "$lock")" 2>/dev/null
+    rm -f "$lock"
+    ;;
+*)
+    echo "usage: claude-awake start|stop" >&2
+    exit 2
+    ;;
+esac
