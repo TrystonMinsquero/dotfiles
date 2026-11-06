@@ -34,6 +34,7 @@ config.window_padding = {
 -- tabs
 config.hide_tab_bar_if_only_one_tab = true
 config.use_fancy_tab_bar = true
+config.mouse_wheel_scrolls_tabs = false
 -- config.tab_bar_at_bottom = true
 
 -- config.inactive_pane_hsb = {
