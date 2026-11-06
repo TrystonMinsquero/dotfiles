@@ -55,6 +55,146 @@ wezterm.on("format-window-title", function(tab, pan, tabs, panes, config)
 	return "Wezterm"
 end)
 
+-- Session persistence (resurrect.wezterm): every workspace is saved each
+-- minute and on quit, and all of them come back when wezterm starts.
+-- Shells get their scrollback back; full-screen programs (nvim, htop) are re-run;
+-- Claude Code panes resume their conversation.
+-- pcall so a failed plugin download never breaks the whole config.
+local ok, resurrect = pcall(wezterm.plugin.require, "https://github.com/MLFlexer/resurrect.wezterm")
+if not ok then
+	wezterm.log_error("resurrect.wezterm failed to load: " .. tostring(resurrect))
+	resurrect = nil
+end
+
+-- Workspace names from the last save, active one first
+local session_file = resurrect and (resurrect.state_manager.save_state_dir .. "session")
+
+-- Session ID of the Claude Code instance running in a pane, if any.
+-- Claude writes ~/.claude/sessions/<pid>.json for every running instance.
+local function claude_session_id(pane)
+	local info = pane:get_foreground_process_info()
+	if not info then
+		return nil
+	end
+	local cmd = (info.executable or "") .. " " .. table.concat(info.argv or {}, " ")
+	if not cmd:find("claude") then
+		return nil
+	end
+	local f = io.open(wezterm.home_dir .. "/.claude/sessions/" .. info.pid .. ".json", "r")
+	if not f then
+		return nil
+	end
+	local parsed, data = pcall(wezterm.json_parse, f:read("*a"))
+	f:close()
+	return parsed and data and data.sessionId or nil
+end
+
+-- Tags each saved pane that runs Claude Code with its session ID.
+-- Saved panes are matched to live ones by their position in the tab.
+local function tag_claude_panes(win, window_state)
+	for i, tab_info in ipairs(win:tabs_with_info()) do
+		local ids = {}
+		for _, p in ipairs(tab_info.tab:panes_with_info()) do
+			ids[p.left .. "," .. p.top] = claude_session_id(p.pane)
+		end
+		local function walk(node)
+			if node then
+				node.claude_session = ids[node.left .. "," .. node.top]
+				walk(node.right)
+				walk(node.bottom)
+			end
+		end
+		walk(window_state.tabs[i] and window_state.tabs[i].pane_tree)
+	end
+end
+
+local function restore_pane(pane_tree)
+	if pane_tree.claude_session then
+		pane_tree.pane:send_text("claude --resume " .. pane_tree.claude_session .. "\r")
+	else
+		resurrect.tab_state.default_on_pane_restore(pane_tree)
+	end
+end
+
+local function save_session()
+	if not resurrect then
+		return
+	end
+	local states = {}
+	for _, win in ipairs(wezterm.mux.all_windows()) do
+		local ws = win:get_workspace()
+		states[ws] = states[ws] or { workspace = ws, window_states = {} }
+		local window_state = resurrect.window_state.get_window_state(win)
+		tag_claude_panes(win, window_state)
+		table.insert(states[ws].window_states, window_state)
+	end
+	local active = wezterm.mux.get_active_workspace()
+	local names = { active }
+	for ws, state in pairs(states) do
+		resurrect.state_manager.save_state(state)
+		if ws ~= active then
+			table.insert(names, ws)
+		end
+	end
+	if not states[active] then
+		return -- nothing open; keep the last session
+	end
+	local f = io.open(session_file, "w")
+	if f then
+		f:write(table.concat(names, "\n"))
+		f:close()
+	end
+end
+
+if resurrect then
+	resurrect.state_manager.set_max_nlines(2000)
+
+	-- One timer per wezterm process (config reloads would otherwise stack them).
+	-- It fires an event, so the save code is always the latest config's.
+	wezterm.on("save-session", save_session)
+	if not wezterm.GLOBAL.save_loop_started then
+		wezterm.GLOBAL.save_loop_started = true
+		local function save_loop()
+			wezterm.emit("save-session")
+			wezterm.time.call_after(60, save_loop)
+		end
+		wezterm.time.call_after(60, save_loop)
+	end
+
+	wezterm.on("gui-startup", function(cmd)
+		-- `wezterm start -- prog` opens just that program
+		if cmd and cmd.args then
+			return
+		end
+		local f = io.open(session_file, "r")
+		if not f then
+			return
+		end
+		local names = {}
+		for line in f:lines() do
+			if line ~= "" then
+				table.insert(names, line)
+			end
+		end
+		f:close()
+		for _, name in ipairs(names) do
+			local state = resurrect.state_manager.load_state(name, "workspace")
+			if state.window_states then
+				resurrect.workspace_state.restore_workspace(state, {
+					spawn_in_workspace = true,
+					relative = true,
+					restore_text = true,
+					resize_window = false, -- KWin sizes the window
+					on_pane_restore = restore_pane,
+				})
+			end
+		end
+		if names[1] then
+			wezterm.mux.set_active_workspace(names[1])
+		end
+	end)
+end
+
 -- keymaps
 
 wezterm.global_key_assignments = {
@@ -565,7 +705,9 @@ config.keys = { -- Navigate Splits
 	{
 		key = "q",
 		mods = MOD_EXTRA,
-		action = act.QuitApplication,
+		action = wezterm.action_callback(function()
+			save_session()
+		end),
 	},
 	-- Scroll
 	{ key = "PageUp", action = act.DisableDefaultAssignment },
@@ -699,16 +841,34 @@ config.keys = { -- Navigate Splits
 	},
 }
 
+-- Mouse wheel scroll speed: lines per wheel tick
+local wheel_lines = 1
+config.alternate_buffer_wheel_scroll_speed = wheel_lines -- full-screen apps (less, man)
+config.mouse_bindings = {
+	{
+		event = { Down = { streak = 1, button = { WheelUp = 1 } } },
+		mods = "NONE",
+		action = act.ScrollByLine(-wheel_lines),
+	},
+	{
+		event = { Down = { streak = 1, button = { WheelDown = 1 } } },
+		mods = "NONE",
+		action = act.ScrollByLine(wheel_lines),
+	},
+}
+
 if wezterm.gui then
-	-- local copy_mode = wezterm.gui.default_key_tables().copy_mode
-	-- local copy_mode_extensions = {
-	-- 	{ key = "g", mods = "CTRL", action = "OpenLinkAtMouseCursor" },
-	-- 	{ key = "g", mods = MOD, action = "OpenLinkAtMouseCursor" },
-	-- }
-	-- for _, key_bind in ipairs(copy_mode_extensions) do
-	-- 	table.insert(copy_mode, key_bind)
-	-- end
-	-- config.key_tables.copy_mode = copy_mode
+	local copy_mode = wezterm.gui.default_key_tables().copy_mode
+	local copy_mode_extensions = {
+		{ key = "k", mods = MOD, action = act.CopyMode("MoveUp") },
+		{ key = "j", mods = MOD, action = act.CopyMode("MoveDown") },
+		{ key = "u", mods = MOD, action = act.CopyMode({ MoveByPage = -0.5 }) },
+		{ key = "d", mods = MOD, action = act.CopyMode({ MoveByPage = 0.5 }) },
+	}
+	for _, key_bind in ipairs(copy_mode_extensions) do
+		table.insert(copy_mode, key_bind)
+	end
+	config.key_tables = { copy_mode = copy_mode }
 end
 
 -- For example, changing the color scheme:
@@ -768,6 +928,9 @@ if wezterm.target_triple:find("windows") then
 end
 
 config.initial_cols = 80
+-- Let the window manager own the window size (otherwise wezterm shrinks
+-- itself back to initial_cols when the display scale is applied at startup)
+config.adjust_window_size_when_changing_font_size = false
 
 -- and finally, return the configuration to wezterm
 return config
