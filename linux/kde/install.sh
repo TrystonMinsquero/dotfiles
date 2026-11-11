@@ -51,7 +51,7 @@ shortcut() { # component action keys...  (no keys = unbind)
 }
 shortcut org.kde.krunner.desktop _launch 268435488 134217760 150994993 16777362  # Meta+Space, Alt+Space, Alt+F2, Search
 shortcut org.kde.konsole.desktop _launch                       # Ctrl+Alt+T is WezTerm's new tab
-shortcut org.kde.screenreader.desktop toggleScreenReader       # frees Meta+Alt+S for workspace S
+shortcut kaccess "Toggle Screen Reader On and Off"             # frees Meta+Alt+S for workspace S
 shortcut org.kde.spectacle.desktop RecordScreen                # frees Meta+Alt+R for workspace R
 shortcut "KDE Keyboard Layout Switcher" "Switch to Next Keyboard Layout"        # frees Meta+Alt+K (focus up)
 shortcut "KDE Keyboard Layout Switcher" "Switch to Last-Used Keyboard Layout"   # frees Meta+Alt+L (focus right)
