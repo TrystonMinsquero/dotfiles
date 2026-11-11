@@ -16,6 +16,7 @@ Linux/KDE only. Standard library only.
 import ast
 import json
 import os
+import shutil
 import select
 import signal
 import socket
@@ -29,10 +30,14 @@ STATE = os.path.expanduser("~/.local/state/kanata-modes.json")
 SOCK = os.path.join(os.environ.get("XDG_RUNTIME_DIR", "/tmp"), "kanata-modes.sock")
 
 
+QDBUS = shutil.which("qdbus6") or shutil.which("qdbus-qt6")  # Fedora/Bazzite name
+
+
 def osd(text):
-    subprocess.Popen(["qdbus6", "org.kde.plasmashell", "/org/kde/osdService",
-                      "org.kde.osdService.showText", "input-keyboard", text],
-                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if QDBUS:
+        subprocess.Popen([QDBUS, "org.kde.plasmashell", "/org/kde/osdService",
+                          "org.kde.osdService.showText", "input-keyboard", text],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 def kwin_device(dev, prop):

@@ -10,6 +10,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 KW() { kwriteconfig6 --file powerdevilrc "$@"; }
+command -v qdbus6 >/dev/null || qdbus6() { qdbus-qt6 "$@"; }   # Fedora/Bazzite name
 
 if command -v kwriteconfig6 >/dev/null && command -v kscreen-doctor >/dev/null; then
     echo "==> laptop: KDE power profiles"

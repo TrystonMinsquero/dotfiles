@@ -10,6 +10,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 KW() { kwriteconfig6 "$@"; }
+command -v qdbus6 >/dev/null || qdbus6() { qdbus-qt6 "$@"; }   # Fedora/Bazzite name
 
 echo "==> kde: stowing kwin kanata-modes fish"
 stow -d . -t ~ --no-folding --restow kwin kanata-modes fish
