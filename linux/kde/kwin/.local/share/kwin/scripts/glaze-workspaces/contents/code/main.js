@@ -4,15 +4,16 @@
 //   moves the focused window there. Desktop names show the key, e.g. [T]erminal.
 // - SLOTS are fixed: windows matching their rules always open there.
 // - Any other app opens on its own desktop and gets the first free letter of
-//   its name, e.g. Outlook -> [O]utlook. If none is free: "Steam [B]".
-// - Empty desktops are removed once you leave them (except keepAlive slots),
-//   so the panel bar only shows what's in use, like zebar.
+//   its name, e.g. Outlook -> [O]utlook. If none is free: "Outlook [B]".
+// - Empty desktops are removed once you leave them (slots included; a slot only
+//   reserves its key), so the panel bar only shows what's in use, like zebar.
 
 const SLOTS = [
     // expand: new windows open expanded (Meta+Alt+Enter size)
-    { key: "d", name: "Discord", keepAlive: true, expand: true, match: [{ cls: /^(discord|vesktop|webcord)$/i }] },
+    { key: "d", name: "Discord", expand: true, match: [{ cls: /^(discord|vesktop|webcord)$/i }] },
     { key: "e", name: "Explorer", expand: true, match: [{ cls: /firefox|chrom(e|ium)|brave|zen/i }] },
-    { key: "t", name: "Terminal", keepAlive: true, expand: true, match: [{ cls: /wezterm/i }] },
+    { key: "s", name: "Steam", match: [{ cls: /^steam$/i }] },
+    { key: "t", name: "Terminal", expand: true, match: [{ cls: /wezterm/i }] },
 ];
 
 // Letters taken by the window hotkeys below.
@@ -25,7 +26,7 @@ const IGNORE = [
     { caption: /picture.in.picture/i },
 ];
 
-// "Term" + "t" -> "[T]erm", "Misc" + "1" -> "[1] Misc", "Steam" + "b" -> "Steam [B]"
+// "Term" + "t" -> "[T]erm", "Misc" + "1" -> "[1] Misc", "Outlook" + "b" -> "Outlook [B]"
 function label(name, key) {
     const K = key.toUpperCase();
     if (!name) return "[" + K + "]";
@@ -117,7 +118,7 @@ function appDesktop(cls, w) {
         return d;
     }
     // On an empty, unclaimed workspace (e.g. [S] from Meta+Alt+S)? The app takes it
-    // over and keeps its key: Steam opened on [S] becomes [S]team.
+    // over and keeps its key: Godot opened on [G] becomes [G]odot.
     const cur = workspace.currentDesktop;
     const ck = kinds[cur.id];
     if (ck && ck.key && !ck.slot && !ck.app && !ck.appName && windowsOn(cur, w).length === 0) {
@@ -141,7 +142,7 @@ function cleanup(exclude) {
     const current = workspace.currentDesktop;
     const empty = workspace.desktops.filter((d) => {
         const k = kinds[d.id];
-        return k && !(k.slot && k.slot.keepAlive) && d.id !== current.id &&
+        return k && d.id !== current.id &&
             windowsOn(d, exclude).length === 0;
     });
     empty.forEach((d) => {
@@ -333,10 +334,8 @@ function showPrevious() {
 registerShortcut("Glaze: recent", "Glaze: Go to previous workspace", "Meta+Alt+,", showPrevious);
 registerShortcut("Glaze: recent (Meta+Tab)", "Glaze: Go to previous workspace (Meta+Tab)", "Meta+Tab", showPrevious);
 
-// Startup: adopt existing desktops by name, make sure keepAlive slots exist,
-// then sort every open window.
+// Startup: adopt existing desktops by name, then sort every open window.
 (function init() {
-    const startDesktop = workspace.currentDesktop;
     workspace.desktops.forEach((d) => {
         // Match by name, or by the [x] key so a slot keeps its desktop if its name differs.
         const tag = d.name.match(/\[(.)\]/);
@@ -347,15 +346,13 @@ registerShortcut("Glaze: recent (Meta+Tab)", "Glaze: Go to previous workspace (M
             d.name = slot.label;
             return;
         }
-        // "[O]utlook" / "Steam [B]" / "Konsole" -> app name + key
+        // "[O]utlook" / "Outlook [B]" / "Konsole" -> app name + key
         const m = d.name.match(/\[(.)\]/);
         const key = m && KEYS.includes(m[1].toLowerCase()) ? m[1].toLowerCase() : null;
         const name = d.name.replace(/\[(.)\]/, "$1").replace(/ [A-Z0-9]$/, "").trim();
         // A bare "[S]" is an empty workspace, not an app called "S"
         kinds[d.id] = { key: key, appName: name.length > 1 ? name : null };
     });
-    SLOTS.filter((s) => s.keepAlive).forEach(slotDesktop);
-
     workspace.windowList().forEach((w) => {
         if (!managed(w)) return;
         if (w.minimized) w.minimized = false;
@@ -364,9 +361,6 @@ registerShortcut("Glaze: recent (Meta+Tab)", "Glaze: Go to previous workspace (M
         place(w, false);
     });
 
-    if (windowsOn(startDesktop).length === 0) {
-        workspace.currentDesktop = slotDesktop(SLOTS.find((s) => s.keepAlive));
-    }
     cleanup();
     log("loaded: " + workspace.desktops.map((d) => d.name).join(", "));
 })();
