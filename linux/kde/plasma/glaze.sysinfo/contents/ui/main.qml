@@ -19,13 +19,13 @@ PlasmoidItem {
     readonly property color hot: "#ff9d9d"
     readonly property string font: "JetBrains Mono"
 
-    property int cpuTemp: 0         // °C
+    property int cpuTemp: -1        // °C (-1 = unknown)
     property real ramFree: 0        // GiB available
     property real ramTotal: 0       // GiB
     property real appRam: -1        // GiB used by the focused app (-1 = unknown)
-    property string gpu: "?"        // "on" / "off"
+    property string gpu: ""         // "on" / "off", "" = not a hybrid-graphics machine
     property string wifi: ""        // connection name, "" when disconnected
-    property int signal: 0          // %
+    property int signal: -1         // % (-1 = unknown)
     property int battery: -1        // %
     property string batState: ""    // Charging / Discharging / Full / Not charging
     property string net: "full"     // NetworkManager connectivity
@@ -39,7 +39,7 @@ PlasmoidItem {
         net === "none" || (!wifi && net !== "full" && net !== "unknown") ? "off"
         : net === "portal" ? "login"
         : net === "limited" ? "limited"
-        : wifi && signal < 40 ? signal + "%"
+        : wifi && signal >= 0 && signal < 40 ? signal + "%"
         : ""
 
     // Battery time until empty while discharging, or until the charge limit
@@ -96,13 +96,13 @@ PlasmoidItem {
                 if (i > 0) v[line.slice(0, i)] = line.slice(i + 1);
             });
             const gib = (kb) => parseInt(kb) / 1048576;
-            root.cpuTemp = Math.round(parseInt(v.cpu) / 1000);
+            root.cpuTemp = v.cpu !== undefined ? Math.round(parseInt(v.cpu) / 1000) : -1;
             root.ramFree = gib(v.memavail);
             root.ramTotal = gib(v.memtotal);
-            root.gpu = v.gpu === "suspended" || v.gpu === "removed" ? "off" : (v.gpu ? "on" : "?");
+            root.gpu = v.gpu === undefined ? "" : v.gpu === "suspended" || v.gpu === "removed" ? "off" : "on";
             root.appRam = v.app !== undefined ? gib(v.app) : -1;
             root.wifi = v.wifi || "";
-            root.signal = parseInt(v.signal) || 0;
+            root.signal = v.signal !== undefined ? parseInt(v.signal) : -1;
             root.battery = v.bat !== undefined ? parseInt(v.bat) : -1;
             const prevState = root.batState;
             root.batState = v.batstate || "";
@@ -124,10 +124,10 @@ PlasmoidItem {
     toolTipSubText: "Focused app" + (appName ? " (" + appName + ")" : "") + ": "
         + (appRam >= 0 ? appRam.toFixed(2) + " GiB" : "n/a")
         + "\nAvailable: " + ramFree.toFixed(1) + " GiB of " + ramTotal.toFixed(1) + " GiB"
-        + "\nNVIDIA GPU: " + gpu + "\nCPU: " + cpuTemp + " °C"
+        + (gpu ? "\nNVIDIA GPU: " + gpu : "") + (cpuTemp >= 0 ? "\nCPU: " + cpuTemp + " °C" : "")
         + "\nWi-Fi: " + (wifi ? wifi + " (" + signal + "%)" : "disconnected")
-        + "\nBattery: " + battery + "% (" + batState.toLowerCase() + ")"
-        + (timeLeft ? ", " + timeLeft + (batState === "Charging" ? " to " + batLimit + "%" : " left") : "")
+        + (battery < 0 ? "" : "\nBattery: " + battery + "% (" + batState.toLowerCase() + ")"
+        + (timeLeft ? ", " + timeLeft + (batState === "Charging" ? " to " + batLimit + "%" : " left") : ""))
 
     component Stat: Row {
         property string label
@@ -148,17 +148,19 @@ PlasmoidItem {
         Layout.preferredWidth: implicitWidth
 
         Stat {
+            visible: root.cpuTemp >= 0
             label: "cpu"
             value: root.cpuTemp + "°"
             valueColor: root.cpuTemp >= 85 ? root.hot : Kirigami.Theme.textColor
         }
-        Dot {}
+        Dot { visible: root.cpuTemp >= 0 }
         Stat {
+            visible: root.gpu !== ""
             label: "gpu"
             value: root.gpu
             valueColor: root.gpu === "on" ? root.accent : root.muted
         }
-        Dot {}
+        Dot { visible: root.gpu !== "" }
         // focused app / available / total
         Row {
             spacing: Kirigami.Units.smallSpacing
@@ -179,8 +181,9 @@ PlasmoidItem {
             value: root.netProblem
             valueColor: root.hot
         }
-        Dot {}
+        Dot { visible: root.battery >= 0 }
         Stat {
+            visible: root.battery >= 0
             label: "bat"
             // + while charging, = when plugged in but holding (charge limit / full)
             value: root.battery + "%" + (root.batState === "Charging" ? "+"

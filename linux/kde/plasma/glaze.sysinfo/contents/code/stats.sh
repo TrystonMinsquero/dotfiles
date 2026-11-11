@@ -1,9 +1,10 @@
 #!/bin/sh
 # Prints key=value lines for the System Stats widget:
-#   cpu=      CPU temperature (millidegrees C, k10temp)
+#   cpu=      CPU temperature (millidegrees C, k10temp or coretemp)
 #   memavail= available RAM (kB)
 #   memtotal= total RAM (kB)
-#   gpu=      NVIDIA GPU runtime status (active / suspended / removed)
+#   gpu=      NVIDIA GPU runtime status (active / suspended / removed), only on
+#             hybrid-graphics machines
 #   app=      memory of the focused app (kB, PSS summed over its process tree)
 #   wifi=     Wi-Fi connection name, empty when disconnected
 #   signal=   Wi-Fi signal (%)
@@ -17,17 +18,20 @@
 # NVIDIA GPU or triggers a Wi-Fi scan.
 
 for h in /sys/class/hwmon/hwmon*; do
-    [ "$(cat "$h/name")" = k10temp ] && echo "cpu=$(cat "$h/temp1_input")"
+    case $(cat "$h/name") in k10temp|coretemp) echo "cpu=$(cat "$h/temp1_input")"; break ;; esac
 done
 
 awk '/^MemAvailable:/{a=$2} /^MemTotal:/{t=$2} END{print "memavail=" a; print "memtotal=" t}' /proc/meminfo
 
-# No NVIDIA device at all = switched off completely (supergfxctl Integrated mode)
-gpu=removed
+# No NVIDIA device at all = switched off completely (supergfxctl Integrated mode).
+# Skipped when there's no integrated GPU: then the NVIDIA one is just always on.
+gpu=removed igpu=
 for d in /sys/bus/pci/devices/*; do
-    [ "$(cat "$d/vendor")" = 0x10de ] && case $(cat "$d/class") in 0x03*) gpu=$(cat "$d/power/runtime_status") ;; esac
+    case $(cat "$d/class") in 0x03*)
+        if [ "$(cat "$d/vendor")" = 0x10de ]; then gpu=$(cat "$d/power/runtime_status"); else igpu=1; fi ;;
+    esac
 done
-echo "gpu=$gpu"
+[ -n "$igpu" ] && echo "gpu=$gpu"
 
 if [ -n "$1" ] && [ "$1" -gt 0 ] 2>/dev/null; then
     # The app's PID plus all of its descendants (browsers and Electron apps are many processes)
@@ -45,9 +49,10 @@ fi
 echo "wifi=$(nmcli -t -f TYPE,STATE,CONNECTION device 2>/dev/null | awk -F: '$1 == "wifi" && $2 == "connected" { print $3; exit }')"
 echo "net=$(nmcli -t networking connectivity 2>/dev/null)"
 # Link quality is out of 70
-awk 'NR > 2 { gsub(/\./, "", $3); printf "signal=%d\n", $3 * 100 / 70; exit }' /proc/net/wireless
+[ -r /proc/net/wireless ] && awk 'NR > 2 { gsub(/\./, "", $3); printf "signal=%d\n", $3 * 100 / 70; exit }' /proc/net/wireless
 
 for b in /sys/class/power_supply/BAT*; do
+    [ -e "$b" ] || break
     echo "bat=$(cat "$b/capacity")"
     echo "batstate=$(cat "$b/status")"
     echo "batcharge=$(cat "$b/charge_now" 2>/dev/null)"
